@@ -117,7 +117,7 @@
     <div class="page-inner">
 
       <!-- HEADER -->
-      <header class="site-header">
+      <header class="site-header hero-visible" id="main-header">
         <div>
           <div class="site-title">91 Teal</div>
           <div class="site-location">Fire Island Pines, New York</div>
@@ -131,6 +131,11 @@
           <a href="#book">Book</a>
         </nav>
       </header>
+
+      <!-- BACK TO TOP -->
+      <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+        ↑
+      </button>
 
       <!-- HERO -->
       <section class="hero-shell">
@@ -381,6 +386,42 @@
   });
 
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Header scroll effect
+  var header = document.getElementById('main-header');
+  var hero = document.querySelector('.hero-shell');
+  
+  function updateHeader() {
+    var heroBottom = hero.offsetTop + hero.offsetHeight;
+    var scrollPos = window.scrollY;
+    
+    if (scrollPos > heroBottom - 100) {
+      header.classList.remove('hero-visible');
+    } else {
+      header.classList.add('hero-visible');
+    }
+  }
+  
+  window.addEventListener('scroll', updateHeader);
+  updateHeader();
+
+  // Back to top button
+  var backToTopBtn = document.getElementById('back-to-top');
+  
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 500) {
+      backToTopBtn.classList.add('visible');
+    } else {
+      backToTopBtn.classList.remove('visible');
+    }
+  });
+  
+  backToTopBtn.addEventListener('click', function() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
 </script>
 
 </body>
