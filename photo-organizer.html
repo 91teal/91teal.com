@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>91 Teal Photo Organizer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #151515;
+    }
+    
+    .instructions {
+      background: #f0f9ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #0ea5e9;
+    }
+    
+    .instructions p {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #c9835b;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #b57450;
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    
+    .photo-item {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 8px;
+      background: white;
+      cursor: move;
+      transition: all 0.2s;
+    }
+    
+    .photo-item:hover {
+      border-color: #c9835b;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .photo-item.dragging {
+      opacity: 0.5;
+    }
+    
+    .photo-item.excluded {
+      opacity: 0.4;
+      border-color: #ef4444;
+    }
+    
+    .photo-number {
+      background: #c9835b;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    
+    .photo-item.excluded .photo-number {
+      background: #ef4444;
+    }
+    
+    .photo-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .photo-filename {
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    
+    .photo-caption {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 60px;
+      margin-bottom: 8px;
+    }
+    
+    .photo-actions {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 12px;
+      flex: 1;
+    }
+    
+    .output {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .output h3 {
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    
+    .output pre {
+      background: #1f2937;
+      color: #f3f4f6;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+    
+    .stat {
+      flex: 1;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #c9835b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📸 91 Teal Photo Organizer</h1>
+    
+    <div class="instructions">
+      <p><strong>Instructions:</strong></p>
+      <p>1. <strong>Drag photos</strong> to reorder them - the number shows the final order</p>
+      <p>2. <strong>Add captions</strong> to describe each photo</p>
+      <p>3. <strong>Exclude photos</strong> you don't want (optional)</p>
+      <p>4. <strong>Export</strong> to get your captions.txt file and rename commands</p>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Photos</div>
+        <div class="stat-value" id="total-count">52</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Selected</div>
+        <div class="stat-value" id="selected-count">52</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Excluded</div>
+        <div class="stat-value" id="excluded-count">0</div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn-primary" onclick="exportData()">📥 Export Captions & Commands</button>
+      <button class="btn-secondary" onclick="autoCaption()">✨ Auto-generate sample captions</button>
+      <button class="btn-secondary" onclick="resetOrder()">🔄 Reset to original order</button>
+    </div>
+    
+    <div class="photo-grid" id="photo-grid"></div>
+    
+    <div class="output" id="output" style="display: none;">
+      <h3>📋 Copy this to captions.txt:</h3>
+      <pre id="captions-output"></pre>
+      
+      <h3 style="margin-top: 20px;">💻 Run these commands to rename files:</h3>
+      <p style="margin-bottom: 10px; font-size: 14px; color: #6b7280;">
+        (Mac/Linux: run in Terminal | Windows: run in Command Prompt or use Git Bash)
+      </p>
+      <pre id="rename-output"></pre>
+    </div>
+  </div>
+
+  <script>
+    const photos = [
+      'IMG_0033.jpg', 'IMG_0252.jpg', 'IMG_0430.jpg', 'IMG_0744.jpg', 'IMG_0745.JPEG',
+      'IMG_0745.jpg', 'IMG_0768.JPEG', 'IMG_0782.JPEG', 'IMG_0816.JPEG', 'IMG_0823.jpg',
+      'IMG_0945.jpg', 'IMG_1106.jpg', 'IMG_1148.jpg', 'IMG_1374.jpg', 'IMG_1442.JPEG',
+      'IMG_1981.jpg', 'IMG_1984.jpg', 'IMG_2324.jpg', 'IMG_2343.JPEG', 'IMG_2406.jpg',
+      'IMG_2407.jpg', 'IMG_2442.jpg', 'IMG_2454.jpg', 'IMG_2455.jpg', 'IMG_2456.jpg',
+      'IMG_2460.jpg', 'IMG_2461.jpg', 'IMG_2462.jpg', 'IMG_2465.jpg', 'IMG_2468.jpg',
+      'IMG_2471.jpg', 'IMG_2474.jpg', 'IMG_2475.jpg', 'IMG_2476.jpg', 'IMG_2517.JPEG',
+      'IMG_2527.JPEG', 'IMG_2822.jpeg', 'IMG_2877.jpg', 'IMG_2878.jpg', 'IMG_2885.jpg',
+      'IMG_2912.jpg', 'IMG_3476.jpg', 'IMG_3522.jpg', 'IMG_3637.jpg', 'IMG_3921.jpg',
+      'IMG_4153.jpg', 'IMG_4191.JPEG', 'IMG_4579.jpg', 'IMG_4600.JPEG', 'IMG_5038.jpg',
+      'IMG_5913.jpg', 'IMG_5973.jpg', 'IMG_6963.jpg'
+    ];
+    
+    let photoData = photos.map((filename, index) => ({
+      filename,
+      caption: '',
+      excluded: false,
+      order: index
+    }));
+    
+    let draggedItem = null;
+    
+    function renderPhotos() {
+      const grid = document.getElementById('photo-grid');
+      grid.innerHTML = '';
+      
+      photoData.forEach((photo, index) => {
+        const item = document.createElement('div');
+        item.className = 'photo-item' + (photo.excluded ? ' excluded' : '');
+        item.draggable = true;
+        item.dataset.index = index;
+        
+        const ext = photo.filename.split('.').pop().toLowerCase();
+        const normalizedExt = ext === 'jpeg' ? 'jpg' : ext;
+        
+        item.innerHTML = `
+          <div class="photo-number">${photo.excluded ? 'EXCLUDED' : 'Photo ' + (index + 1)}</div>
+          <img src="./Images/gallery/${photo.filename}" class="photo-img" alt="${photo.filename}">
+          <div class="photo-filename">${photo.filename}</div>
+          <textarea 
+            class="photo-caption" 
+            placeholder="Add a caption describing this photo..."
+            onchange="updateCaption(${index}, this.value)"
+          >${photo.caption}</textarea>
+          <div class="photo-actions">
+            <button class="btn-small btn-secondary" onclick="toggleExclude(${index})">
+              ${photo.excluded ? 'Include' : 'Exclude'}
+            </button>
+          </div>
+        `;
+        
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+        
+        grid.appendChild(item);
+      });
+      
+      updateStats();
+    }
+    
+    function handleDragStart(e) {
+      draggedItem = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+    
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      
+      if (draggedItem !== this) {
+        const draggedIndex = parseInt(draggedItem.dataset.index);
+        const targetIndex = parseInt(this.dataset.index);
+        
+        const temp = photoData[draggedIndex];
+        photoData.splice(draggedIndex, 1);
+        photoData.splice(targetIndex, 0, temp);
+        
+        renderPhotos();
+      }
+      
+      return false;
+    }
+    
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+    }
+    
+    function updateCaption(index, caption) {
+      photoData[index].caption = caption;
+    }
+    
+    function toggleExclude(index) {
+      photoData[index].excluded = !photoData[index].excluded;
+      renderPhotos();
+    }
+    
+    function updateStats() {
+      const excluded = photoData.filter(p => p.excluded).length;
+      const selected = photoData.length - excluded;
+      
+      document.getElementById('total-count').textContent = photoData.length;
+      document.getElementById('selected-count').textContent = selected;
+      document.getElementById('excluded-count').textContent = excluded;
+    }
+    
+    function autoCaption() {
+      const samples = [
+        'Living room with modern furnishings',
+        'Pool area at sunset',
+        'Kitchen with new appliances',
+        'Master bedroom with king bed',
+        'Bathroom with walk-in shower',
+        'Outdoor deck space',
+        'Entrance and exterior view',
+        'Dining area details',
+        'Guest bedroom',
+        'Hot tub area'
+      ];
+      
+      photoData.forEach((photo, index) => {
+        if (!photo.caption && !photo.excluded) {
+          photo.caption = samples[index % samples.length];
+        }
+      });
+      
+      renderPhotos();
+      alert('Sample captions added! Edit them to match your actual photos.');
+    }
+    
+    function resetOrder() {
+      photoData.sort((a, b) => a.order - b.order);
+      renderPhotos();
+    }
+    
+    function exportData() {
+      const included = photoData.filter(p => !p.excluded);
+      
+      // Generate captions.txt content
+      let captionsText = '';
+      let renameCommands = '# Navigate to your Images/gallery folder first:\n';
+      renameCommands += '# cd Images/gallery\n\n';
+      
+      included.forEach((photo, index) => {
+        const num = String(index + 1).padStart(2, '0');
+        const ext = photo.filename.split('.').pop();
+        const newFilename = `gallery${num}.${ext}`;
+        const caption = photo.caption || 'Photo description needed';
+        
+        captionsText += `${newFilename}|${caption}\n`;
+        
+        // Escape special characters for shell
+        const safeOldName = photo.filename.replace(/'/g, "'\\''");
+        const safeNewName = newFilename.replace(/'/g, "'\\''");
+        
+        renameCommands += `mv '${safeOldName}' '${safeNewName}'\n`;
+      });
+      
+      document.getElementById('captions-output').textContent = captionsText;
+      document.getElementById('rename-output').textContent = renameCommands;
+      document.getElementById('output').style.display = 'block';
+      
+      // Scroll to output
+      document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Initialize
+    renderPhotos();
+  </script>
+</body>
+</html>
