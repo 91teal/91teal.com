@@ -367,24 +367,6 @@
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // Header scroll effect
-  var header = document.getElementById('main-header');
-  var hero = document.querySelector('.hero-shell');
-  
-  function updateHeader() {
-    var heroBottom = hero.offsetTop + hero.offsetHeight;
-    var scrollPos = window.scrollY;
-    
-    if (scrollPos > heroBottom - 100) {
-      header.classList.remove('hero-visible');
-    } else {
-      header.classList.add('hero-visible');
-    }
-  }
-  
-  window.addEventListener('scroll', updateHeader);
-  updateHeader();
-
   // Back to top button
   var backToTopBtn = document.getElementById('back-to-top');
   
