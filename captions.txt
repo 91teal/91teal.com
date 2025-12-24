@@ -1,0 +1,22 @@
+gallery01.jpg|Front of house
+gallery02.jpg|Living and dining room from above
+gallery03.jpg|King Bedroom 1 (full standing desk w/ monitor setup not shown)
+gallery04.jpg|Double Shower for King Bedroom 1
+gallery05.jpg|Friends at a pool party
+gallery06.jpg|King Bedroom 2 (full standing desk w/ monitor setup not shown)
+gallery07.jpg|Shared Shower (Bedroom 2/3)
+gallery08.JPEG|Napping in the pool
+gallery09.jpg|King Bedroom 3
+gallery10.jpg|Desk in King Bedroom 3
+gallery11.jpg|Pool party
+gallery12.jpg|Queen bedroom
+gallery13.jpg|Queen Bathroom
+gallery14.jpg|Living room
+gallery15.jpg|Day bed
+gallery16.jpg|Peloton
+gallery17.jpg|Back of house
+gallery18.jpg|Photo description needed
+gallery19.jpg|Kitchen, pool and living room
+gallery20.jpg|Kitchen stove and sink
+gallery21.jpg|Kitchen island, fridge and bar
+gallery22.jpg|Dining Room
