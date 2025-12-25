@@ -137,6 +137,10 @@
       <button class="back-to-top" id="back-to-top" aria-label="Back to top">
         ↑
       </button>
+      <!-- SHARE -->
+      <button class="share-button" id="share-button" aria-label="Share this page">
+        ⇪
+      </button>
 
       <!-- HERO -->
       <section class="hero-shell">
@@ -393,6 +397,50 @@
     window.open(instagramUrl, '_blank');
   });
 
+  // Share button
+  (function() {
+    const shareButton = document.getElementById('share-button');
+    if (!shareButton) return;
+    
+    const shareText = "Check out this awesome Pines house I found https://91teal.com/";
+    shareButton.addEventListener('click', async function () {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: '91 Teal – Fire Island Pines',
+            text: shareText,
+            url: 'https://91teal.com/'
+          });
+          return;
+        } catch (err) {
+          console.warn('Share canceled or failed', err);
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(shareText);
+          alert('Link copied!');
+          return;
+        } catch (err) {
+          console.warn('Clipboard copy failed', err);
+        }
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.value = shareText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        alert('Link copied!');
+      } catch (err) {
+        alert('Please copy this link: https://91teal.com/');
+      }
+      document.body.removeChild(textarea);
+    });
+  })();
+
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // Gallery data - load from captions
@@ -422,11 +470,14 @@
   ];
 
   let currentLightboxIndex = 0;
+  let fullGalleryRendered = false;
+  let galleryExpanded = false;
 
   // Render featured gallery (first 6)
   function renderFeaturedGallery() {
     const container = document.getElementById('featured-gallery');
-    for (let i = 0; i < 6; i++) {
+    const featuredCount = Math.min(6, galleryData.length);
+    for (let i = 0; i < featuredCount; i++) {
       const item = createGalleryItem(i);
       container.appendChild(item);
     }
@@ -434,11 +485,13 @@
 
   // Render full gallery (remaining 16)
   function renderFullGallery() {
+    if (fullGalleryRendered) return;
     const container = document.getElementById('full-gallery');
     for (let i = 6; i < galleryData.length; i++) {
       const item = createGalleryItem(i);
       container.appendChild(item);
     }
+    fullGalleryRendered = true;
   }
 
   function createGalleryItem(index) {
@@ -460,10 +513,11 @@
     const fullGallery = document.getElementById('full-gallery');
     const btn = document.getElementById('expand-gallery-btn');
     
-    if (fullGallery.style.display === 'none') {
+    if (!galleryExpanded) {
       renderFullGallery();
       fullGallery.style.display = 'grid';
       btn.textContent = 'Show Less';
+      galleryExpanded = true;
       
       // Track expansion
       window.dataLayer.push({
@@ -473,6 +527,7 @@
     } else {
       fullGallery.style.display = 'none';
       btn.textContent = 'View Full Gallery (22 photos)';
+      galleryExpanded = false;
     }
   }
 
