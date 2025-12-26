@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Modern 4BR/4BA Fire Island Pines beach house rental. Heated saltwater pool, hot tub, steps to harbor. LGBTQ-friendly luxury vacation home. Wednesday-Wednesday rentals. Book your Pines summer.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://91teal.com/">
+  <link rel="canonical" href="https://www.91teal.com/">
 
   <!-- OpenGraph -->
   <meta property="og:title" content="91 Teal – Fire Island Pines Luxury Rental">
   <meta property="og:description" content="A modern, design-led beach house with a heated saltwater pool, central location, and thoughtful renovation. Sleeps 8.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://91teal.com/">
+  <meta property="og:url" content="https://www.91teal.com/">
   <meta property="og:image" content="https://www.91teal.com/Images/livingroom.JPEG">
   <meta property="og:image:width" content="1536">
   <meta property="og:image:height" content="2048">
@@ -98,7 +98,7 @@
       {"@type":"LocationFeatureSpecification","name":"New bathrooms"}
     ],
     "email": "hello@91teal.com",
-    "url": "https://91teal.com",
+    "url": "https://www.91teal.com",
     "checkinTime": "16:00",
     "checkoutTime": "10:00",
     "priceRange": "$$$"
@@ -139,7 +139,13 @@
       </button>
       <!-- SHARE -->
       <button class="share-button" id="share-button" aria-label="Share this page">
-        ⇪
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="6" y1="7.5" x2="18" y2="7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="6" y1="16.5" x2="18" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="8" cy="12" r="1.1" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.1" fill="currentColor"/>
+          <circle cx="16" cy="12" r="1.1" fill="currentColor"/>
+        </svg>
       </button>
 
       <!-- HERO -->
@@ -219,6 +225,9 @@
           
           <!-- Featured Photos Grid -->
           <div class="gallery-grid" id="featured-gallery"></div>
+                    
+          <!-- Full Gallery (Hidden Initially) -->
+          <div class="gallery-grid" id="full-gallery" style="display: none; margin-top: 24px;"></div>
           
           <!-- Expand Button -->
           <div style="text-align: center; margin-top: 24px;">
@@ -226,9 +235,6 @@
               View Full Gallery (22 photos)
             </button>
           </div>
-          
-          <!-- Full Gallery (Hidden Initially) -->
-          <div class="gallery-grid" id="full-gallery" style="display: none; margin-top: 24px;"></div>
           
           <div style="text-align: center; margin-top: 20px;">
             <p style="font-size: 0.9rem; color: var(--color-text-muted);">
@@ -402,14 +408,14 @@
     const shareButton = document.getElementById('share-button');
     if (!shareButton) return;
     
-    const shareText = "Check out this awesome Pines house I found https://91teal.com/";
+    const shareText = "Check out this awesome Pines house I found https://www.91teal.com/";
     shareButton.addEventListener('click', async function () {
       if (navigator.share) {
         try {
           await navigator.share({
             title: '91 Teal – Fire Island Pines',
             text: shareText,
-            url: 'https://91teal.com/'
+            url: 'https://www.91teal.com/'
           });
           return;
         } catch (err) {
@@ -435,7 +441,7 @@
         document.execCommand('copy');
         alert('Link copied!');
       } catch (err) {
-        alert('Please copy this link: https://91teal.com/');
+        alert('Please copy this link: https://www.91teal.com/');
       }
       document.body.removeChild(textarea);
     });
