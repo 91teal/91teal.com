@@ -5,6 +5,11 @@
   --color-text-muted: #666666;
   --color-accent: #c9835b;
   --color-border-soft: #e3ded4;
+  --color-available: #c5a253;
+  --color-available-soft: #f3ead0;
+  --color-held: #b86154;
+  --color-held-soft: #efd7d2;
+  --color-booked-soft: #efede8;
 
   --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-heading: Georgia, "Times New Roman", serif;
@@ -300,20 +305,213 @@ section {
   justify-content: center;
 }
 
-/* CALENDAR */
-.availability-sheet {
-  width: 100%;
-  max-width: 100%;
-  height: 480px;
-  border: 0;
-  overflow: hidden;
-  margin-top: 16px;
-  border-radius: 12px;
+/* AVAILABILITY */
+.availability-module {
+  margin-top: 24px;
 }
 
-@media (max-width: 600px) {
-  .availability-sheet {
-    height: 60vh;
+.availability-module [hidden] {
+  display: none !important;
+}
+
+.availability-message {
+  padding: 20px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  background-color: #faf9f6;
+  line-height: 1.5;
+}
+
+.availability-message-error {
+  color: var(--color-text-main);
+}
+
+.availability-ribbon {
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.availability-month {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px 0;
+  margin: 0;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.availability-month-name {
+  padding-top: 12px;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.availability-weeks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 10px;
+}
+
+.availability-week {
+  min-width: 0;
+  padding: 13px 12px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--color-text-main);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.availability-week:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(21, 21, 21, 0.09);
+}
+
+.availability-week:not(:disabled):focus-visible {
+  outline: 3px solid rgba(21, 21, 21, 0.24);
+  outline-offset: 2px;
+}
+
+.availability-week[aria-pressed="true"] {
+  border-color: var(--color-text-main);
+}
+
+.availability-week[data-status="available"] {
+  background-color: var(--color-available-soft);
+}
+
+.availability-week[data-status="held"] {
+  background-color: var(--color-held-soft);
+}
+
+.availability-week[data-status="booked"] {
+  background-color: var(--color-booked-soft);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.78;
+}
+
+.availability-week-date,
+.availability-week-holiday,
+.availability-week-status {
+  display: block;
+}
+
+.availability-week-date {
+  font-family: var(--font-heading);
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+
+.availability-week-holiday {
+  min-height: 1.35em;
+  margin-top: 5px;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.availability-week-status {
+  margin-top: 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.availability-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-top: 16px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.availability-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.availability-status::before {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  content: "";
+}
+
+.availability-status[data-status="available"]::before {
+  background-color: var(--color-available);
+}
+
+.availability-status[data-status="held"]::before {
+  background-color: var(--color-held);
+}
+
+.availability-status[data-status="booked"]::before {
+  background-color: #aaa59b;
+}
+
+.availability-updated {
+  margin-left: auto;
+}
+
+.availability-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 12px;
+  background-color: #faf9f6;
+}
+
+.availability-detail-week {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.availability-detail-note {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .availability-month {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .availability-month-name {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .availability-weeks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .availability-detail {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .availability-updated {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  .availability-detail .btn-primary {
+    width: 100%;
   }
 }
 

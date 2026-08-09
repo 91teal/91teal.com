@@ -1,6 +1,6 @@
 # Availability Section Design Options
 
-Status: concepts only; the live `index.html` availability section has not been changed.
+Status: Option 2 selected and implemented locally; the live site has not been published with the change.
 
 Last reviewed: 2026-08-09
 
@@ -10,35 +10,36 @@ The existing 91 Teal design uses a warm off-white page, white content surfaces, 
 
 The current availability section breaks that visual language because it embeds the complete Google Sheets interface. At the time of review it showed Google’s title bar, grid, sheet tab, horizontal and vertical scrollbars, and `#REF!` errors inside a 480-pixel-tall iframe.
 
-## Public CSV finding
+## Public CSV implementation
 
-The existing published sheet can already be requested as CSV by replacing the `pubhtml` endpoint with:
+The selected implementation reads Adam’s existing published Google Sheet directly as CSV. The exact public endpoint is stored in `index.html`.
 
 ```text
-https://docs.google.com/spreadsheets/d/e/[PUBLISHED_SHEET_ID]/pub?gid=[TAB_GID]&single=true&output=csv
+https://docs.google.com/spreadsheets/d/e/[PUBLISHED_SHEET_ID]/pub?output=csv
 ```
 
 The CSV response returned `Access-Control-Allow-Origin: *`, so browser JavaScript on `www.91teal.com` can fetch it directly without a server or new hosting platform.
 
-The current `gid=0` output is not ready to drive the site. On 2026-08-09 it contained the heading `91 Teal Walk`, the title `2026 Availability`, the columns `Holiday Week`, `Check In Date`, `Cost Before Tax`, `Cost as % "Base"`, and `Sold?`, but the first data row contained `#REF!` and there were no usable availability rows.
+The earlier iframe pointed to a different legacy publication whose first data row contained `#REF!`. Adam supplied a clean publication from the existing availability sheet on 2026-08-09, so the implementation does not use or repair that legacy feed.
 
-## Recommended sheet contract
+## Actual sheet contract
 
-Create a dedicated public tab named `Website Feed`. It should contain only display-safe fields and no tenant names, contact details, deposits, payment information, notes, or internal formulas.
+No new spreadsheet or tab is required. The supplied public CSV already contains only display-safe availability fields and no tenant names, contact details, deposits, payment information, or internal notes.
 
 Recommended columns:
 
 | Column | Format | Purpose |
 |---|---|---|
-| `start_date` | `YYYY-MM-DD` | Rental check-in date |
-| `end_date` | `YYYY-MM-DD` | Rental check-out date |
-| `label` | Text | Optional holiday or seasonal label |
-| `status` | `available`, `held`, or `booked` | Public availability state |
-| `rate` | Number or blank | Optional tax-exclusive rate already approved for public display |
-| `note` | Short text or blank | Optional public note such as `Two-week stay preferred` |
-| `sort` | Number | Stable chronological ordering |
+| `week_id` | Stable text identifier | Identifies a rental week |
+| `start_date` | Display date | Rental check-in date |
+| `end_date` | Display date | Rental check-out date |
+| `dates` | Display text | Sheet-provided compact date range |
+| `event` | Text or blank | Holiday or seasonal label shown on its own line |
+| `status` | `AVAILABLE`, `HELD`/`ON HOLD`, or `BOOKED` | Public availability state |
+| `requestable` | Boolean | Public requestability flag retained in the feed |
+| `last_updated` | Display date | Feed freshness value |
 
-Publishing should be limited to this tab’s `gid`. The website should fetch it on page load, validate the allowed statuses and ISO dates, sort chronologically, and render only current/future rows. If the fetch or validation fails, it should show a calm fallback with the inquiry button rather than a blank section or raw spreadsheet errors.
+The website fetches the CSV on page load, finds columns by header name, validates and parses the dates, sorts chronologically, and renders only periods whose end date has not passed. If the fetch or validation fails, it shows a calm contact fallback rather than a blank section or raw spreadsheet errors.
 
 ## Option 1 — Editorial week list
 
@@ -71,7 +72,7 @@ Tradeoffs:
 - Requires careful mobile reflow and accessible non-color status labels.
 - Notes and rates need a selected-week detail area rather than always being visible.
 
-Adam selected this direction for further development on 2026-08-09 and requested the separate holiday/event line. Holiday/event text must come from the public feed’s `label` field; the website must not infer labels from dates.
+Adam selected this direction for development on 2026-08-09 and requested the separate holiday/event line. Holiday/event text comes from the public feed’s `event` field; the website does not infer labels from dates.
 
 Status color mapping approved for the concept: gold means `available`, red means `held`/on hold, and neutral gray means `booked`. Every tile and the legend must continue to show the status in text so color is never the only signal.
 
@@ -101,13 +102,6 @@ Tradeoffs:
 - Do not render malformed rows or expose raw Google/CSV errors.
 - Keep rates hidden when the published `rate` field is blank.
 
-## Next implementation step
+## Implementation status
 
-After Adam selects a direction:
-
-1. Repair or create the `Website Feed` sheet tab and publish it as CSV.
-2. Confirm the live column names, statuses, sample rows, and whether rates should be public.
-3. Replace the iframe in `index.html` with the selected semantic markup.
-4. Add a small dependency-free CSV parser/renderer and resilient fallback state.
-5. Add responsive styles consistent with `styles.css`.
-6. Test real data, empty data, malformed data, mobile layout, keyboard interaction, and fetch failure before publishing.
+The local branch now replaces the iframe with semantic markup, a small dependency-free CSV parser and renderer, responsive season-ribbon styles, selected-week inquiry detail, and a resilient fallback state. The real public feed, event labels, status controls, desktop layout, and 390-pixel mobile layout have been verified. Publishing remains a separate approval step.

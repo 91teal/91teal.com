@@ -59,7 +59,7 @@ The exact identifiers and URLs live in `index.html`; consult the file before cha
 | Google Tag Manager | Page and custom interaction analytics |
 | Meta Pixel | Page-view and lead/contact tracking |
 | Google Maps embed | Property-location map |
-| Published Google Sheet | Availability calendar iframe |
+| Published Google Sheet | Public CSV source for the custom availability ribbon on the local implementation branch; the exact URL lives in `index.html` |
 | Google Form | Booking inquiry destination |
 | Instagram `@91teal` | External photo/social destination |
 | YouTube | Embedded house walkthrough |
@@ -102,7 +102,7 @@ These were observed from the cloned source and have not been fixed unless a late
 - `trackFormSubmission()` exists in `index.html`, but the inquiry buttons open an external Google Form, so the site itself does not observe a successful form submission.
 - The lightbox controls do not currently have explicit accessible labels, and focus management has not been verified.
 - Mobile and desktop visual QA of the cloned baseline has not yet been performed in this local workspace.
-- The public availability sheet’s `gid=0` CSV output returned `#REF!` and no usable availability rows on 2026-08-09. The current iframe visibly exposes the broken grid.
+- The live `main` page still embeds an older published sheet whose `gid=0` CSV returned `#REF!` on 2026-08-09. The local availability branch replaces that iframe with the newer public CSV module; the live issue remains until the website change is published.
 
 ## Activity log
 
@@ -145,3 +145,15 @@ These were observed from the cloned source and have not been fixed unless a late
 - The selected mapping is gold for `available`, red for `held`/on hold, and neutral gray for `booked`.
 - Status text remains required in every tile and in the legend so meaning does not rely on color alone.
 - Updated the refined mockup and saved design specification; the live site remains unchanged.
+
+### 2026-08-09 — Existing CSV feed wired into the website
+
+- Adam required using the existing Google Sheet and explicitly prohibited creating another spreadsheet.
+- Adam supplied an already-published CSV from the existing availability sheet. The public endpoint is stored in `index.html`; no new spreadsheet or tab was created, and no existing sheet cells or permissions were changed.
+- Verified the feed returns `Access-Control-Allow-Origin: *` and the columns `week_id`, `start_date`, `end_date`, `dates`, `event`, `status`, `requestable`, and `last_updated`.
+- Replaced the availability iframe locally with the selected dependency-free season ribbon driven by that CSV.
+- The renderer groups weeks by start month, preserves the feed’s `event` text as the holiday/event line, filters expired periods by `end_date`, and shows a calm contact fallback if the feed cannot be loaded or validated.
+- Status mapping is `AVAILABLE` to gold, `HELD`/`ON HOLD`/`HOLD` to red, and `BOOKED` or any other non-available status to neutral gray. Booked weeks and rows with `requestable=FALSE` are disabled; requestable available or held weeks expose an inquiry detail.
+- The supplied 2027 feed rendered all 25 rows from May through October during verification. It currently contains available and booked rows but no held row; held rendering is implemented from the status value and palette.
+- Verified the real CSV transformation, holiday labels, disabled booked controls, selected-week detail, desktop layout, and a 390-pixel mobile layout in a local browser preview.
+- `python3 scripts/check_site.py`, `git diff --check`, and inline JavaScript syntax validation passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.
