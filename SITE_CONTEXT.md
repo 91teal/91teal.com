@@ -138,3 +138,10 @@ These were observed from the cloned source and have not been fixed unless a late
 - Each week tile must include a separate holiday/event line when relevant, between the date range and availability status.
 - Holiday/event text must be supplied explicitly by the public feed’s `label` field and must not be inferred by the website.
 - Updated the saved design specification; the live site remains unchanged.
+
+### 2026-08-09 — Season ribbon status palette
+
+- Adam rejected red as the available color.
+- The selected mapping is gold for `available`, red for `held`/on hold, and neutral gray for `booked`.
+- Status text remains required in every tile and in the legend so meaning does not rely on color alone.
+- Updated the refined mockup and saved design specification; the live site remains unchanged.

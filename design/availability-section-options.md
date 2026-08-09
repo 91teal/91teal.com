@@ -57,7 +57,7 @@ Recommendation: preferred direction.
 
 ## Option 2 — Season ribbon
 
-A chronological ribbon grouped by month, with one compact block per rental week. Each block has a date line, a dedicated holiday/event line when relevant, and a status line. Weeks without a holiday keep that middle line visually quiet so dates and statuses remain aligned. Available weeks use the terracotta accent; held and booked weeks use quiet neutral treatments. Selecting a week reveals its date range, holiday/event label when present, and inquiry action below the ribbon.
+A chronological ribbon grouped by month, with one compact block per rental week. Each block has a date line, a dedicated holiday/event line when relevant, and a status line. Weeks without a holiday keep that middle line visually quiet so dates and statuses remain aligned. Available weeks use a soft gold treatment, on-hold weeks use a restrained red treatment, and booked weeks remain neutral. Selecting a week reveals its date range, holiday/event label when present, and inquiry action below the ribbon.
 
 Strengths:
 
@@ -72,6 +72,8 @@ Tradeoffs:
 - Notes and rates need a selected-week detail area rather than always being visible.
 
 Adam selected this direction for further development on 2026-08-09 and requested the separate holiday/event line. Holiday/event text must come from the public feed’s `label` field; the website must not infer labels from dates.
+
+Status color mapping approved for the concept: gold means `available`, red means `held`/on hold, and neutral gray means `booked`. Every tile and the legend must continue to show the status in text so color is never the only signal.
 
 ## Option 3 — Monthly calendar
 
