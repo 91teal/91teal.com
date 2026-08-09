@@ -131,3 +131,10 @@ These were observed from the cloned source and have not been fixed unless a late
 - Saved three concepts in `design/availability-section-options.md`: editorial week list, season ribbon, and monthly calendar.
 - Recommended the editorial week list as the best fit for the current site and the most robust mobile option.
 - Created local branch `codex/availability-section-concepts`; no production page files were changed and nothing was published.
+
+### 2026-08-09 — Season ribbon selected for refinement
+
+- Adam selected Option 2, the season ribbon, for further development.
+- Each week tile must include a separate holiday/event line when relevant, between the date range and availability status.
+- Holiday/event text must be supplied explicitly by the public feed’s `label` field and must not be inferred by the website.
+- Updated the saved design specification; the live site remains unchanged.

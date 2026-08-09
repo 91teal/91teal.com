@@ -57,18 +57,21 @@ Recommendation: preferred direction.
 
 ## Option 2 — Season ribbon
 
-A chronological ribbon grouped by month, with one compact block per rental week. Available weeks use the terracotta accent; held and booked weeks use quiet neutral treatments. Selecting a week reveals its date range and inquiry action below the ribbon.
+A chronological ribbon grouped by month, with one compact block per rental week. Each block has a date line, a dedicated holiday/event line when relevant, and a status line. Weeks without a holiday keep that middle line visually quiet so dates and statuses remain aligned. Available weeks use the terracotta accent; held and booked weeks use quiet neutral treatments. Selecting a week reveals its date range, holiday/event label when present, and inquiry action below the ribbon.
 
 Strengths:
 
 - Makes the full season easy to scan at once.
 - Visually distinctive without departing from the site palette.
 - Well suited to fixed Wednesday-to-Wednesday inventory.
+- Keeps holiday and Pines-event context visible without turning the section into a spreadsheet.
 
 Tradeoffs:
 
 - Requires careful mobile reflow and accessible non-color status labels.
 - Notes and rates need a selected-week detail area rather than always being visible.
+
+Adam selected this direction for further development on 2026-08-09 and requested the separate holiday/event line. Holiday/event text must come from the public feed’s `label` field; the website must not infer labels from dates.
 
 ## Option 3 — Monthly calendar
 
