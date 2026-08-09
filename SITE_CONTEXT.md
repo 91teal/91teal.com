@@ -32,6 +32,7 @@ The site should remain on GitHub Pages and retain its simple static architecture
 | `CNAME` | Must remain exactly `www.91teal.com` unless the domain is intentionally changed. |
 | `scripts/check_site.py` | Local and automated checks for anchors, referenced files, filename case, gallery images, CSS URLs, and `CNAME`. |
 | `.github/workflows/check-site.yml` | Runs the static-site checker on pull requests and selected pushes after it is published to GitHub. |
+| `design/availability-section-options.md` | Saved assessment, CSV data contract, and three replacement concepts for the availability section. |
 
 ## Current page structure
 
@@ -101,6 +102,7 @@ These were observed from the cloned source and have not been fixed unless a late
 - `trackFormSubmission()` exists in `index.html`, but the inquiry buttons open an external Google Form, so the site itself does not observe a successful form submission.
 - The lightbox controls do not currently have explicit accessible labels, and focus management has not been verified.
 - Mobile and desktop visual QA of the cloned baseline has not yet been performed in this local workspace.
+- The public availability sheet’s `gid=0` CSV output returned `#REF!` and no usable availability rows on 2026-08-09. The current iframe visibly exposes the broken grid.
 
 ## Activity log
 
@@ -119,3 +121,13 @@ These were observed from the cloned source and have not been fixed unless a late
 
 - Adam directed that everything learned for future use about the website be saved inside `Leases/Website`.
 - Added this file and made updating it a required step in `AGENTS.md`.
+
+### 2026-08-09 — Availability section concepts
+
+- Reviewed the live site and current embedded Google Sheet availability section.
+- Confirmed the design language is warm off-white, white surfaces, terracotta accents, serif headings, thin warm borders, and soft corners.
+- Confirmed the published sheet supports a browser-readable CSV endpoint and returns permissive cross-origin headers.
+- Found the current `gid=0` CSV has `#REF!` errors and no usable availability rows, so a clean dedicated public feed tab is required before implementation.
+- Saved three concepts in `design/availability-section-options.md`: editorial week list, season ribbon, and monthly calendar.
+- Recommended the editorial week list as the best fit for the current site and the most robust mobile option.
+- Created local branch `codex/availability-section-concepts`; no production page files were changed and nothing was published.
