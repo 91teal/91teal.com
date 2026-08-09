@@ -48,6 +48,7 @@ The same check runs automatically on GitHub when a branch is pushed or a pull re
 | `photo-organizer.html` | Standalone gallery-ordering helper |
 | `CNAME` | Connects GitHub Pages to `www.91teal.com` |
 | `AGENTS.md` | Editing and publishing guardrails for Codex |
+| `SITE_CONTEXT.md` | Durable site knowledge, decisions, known issues, and activity log |
 | `scripts/serve.sh` | Local preview command |
 | `scripts/check_site.py` | Dependency-free site checks |
 

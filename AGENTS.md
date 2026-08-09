@@ -2,6 +2,15 @@
 
 This repository is the public GitHub Pages site for 91 Teal Walk. These instructions apply to all work inside this `Website` folder and override broader lease-workspace instructions when they conflict.
 
+## Persistent site memory
+
+- Read `README.md`, this file, and `SITE_CONTEXT.md` before doing site work.
+- Do not rely on chat history as the only source of site knowledge.
+- Save every durable fact learned about the site, its integrations, its content, its workflow, and its known issues in `SITE_CONTEXT.md` before finishing the task.
+- Update the dated activity log in `SITE_CONTEXT.md` when a decision is made, a verification is completed, or repository/deployment state changes.
+- Keep credentials, private tenant information, and secrets out of site memory. When a value is already present in public client-side code, point to its source file instead of needlessly duplicating sensitive-looking values.
+- If a newly learned fact conflicts with the saved context, record the conflict and its evidence; do not silently choose one.
+
 ## Architecture
 
 - Preserve the dependency-free static site unless Adam explicitly approves a framework or hosting change.
@@ -25,7 +34,8 @@ This repository is the public GitHub Pages site for 91 Teal Walk. These instruct
 3. Preview with `./scripts/serve.sh` and run `python3 scripts/check_site.py`.
 4. For visual changes, verify desktop and narrow/mobile layouts. For interaction changes, test keyboard and touch-relevant behavior.
 5. Summarize the visible result and any content assumptions for Adam.
-6. Do not push, open a pull request, merge, or otherwise publish unless Adam asks for that action. A request to edit or preview is not publishing approval.
+6. Update `SITE_CONTEXT.md` with durable learnings and current verification/publishing state.
+7. Do not push, open a pull request, merge, or otherwise publish unless Adam asks for that action. A request to edit or preview is not publishing approval.
 
 ## Quality rules
 
