@@ -400,6 +400,34 @@
   var googleFormUrl = "https://forms.gle/ENvfe7acgyBqA6zC8";
   var instagramUrl = "https://instagram.com/91teal";
   var availabilityCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTILWKAtDOEHzS5Q42moASNi1rsWPMP1_JciDLkNzNcdfBkaMVnLeNetT_u0X1h2JhqL-t0Sb2EdACn/pub?output=csv";
+  var availabilityCsvFallback = [
+    'week_id,start_date,end_date,dates,event,status,requestable,last_updated',
+    '2027-W0505,"May 5, 2027","May 12, 2027",May 5–May 12,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0512,"May 12, 2027","May 19, 2027",May 12–May 19,,BOOKED,FALSE,"Aug 6, 2026"',
+    '2027-W0519,"May 19, 2027","May 26, 2027",May 19–May 26,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0526,"May 26, 2027","Jun 2, 2027",May 26–Jun 2,Memorial Day (Mon May 31),AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0602,"Jun 2, 2027","Jun 9, 2027",Jun 2–Jun 9,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0609,"Jun 9, 2027","Jun 16, 2027",Jun 9–Jun 16,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0616,"Jun 16, 2027","Jun 23, 2027",Jun 16–Jun 23,Juneteenth (Sat Jun 19),BOOKED,FALSE,"Aug 6, 2026"',
+    '2027-W0623,"Jun 23, 2027","Jun 30, 2027",Jun 23–Jun 30,NYC Pride (Sun Jun 27),AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0630,"Jun 30, 2027","Jul 7, 2027",Jun 30–Jul 7,July 4th (Sun Jul 4),AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0707,"Jul 7, 2027","Jul 14, 2027",Jul 7–Jul 14,,BOOKED,FALSE,"Aug 6, 2026"',
+    '2027-W0714,"Jul 14, 2027","Jul 21, 2027",Jul 14–Jul 21,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0721,"Jul 21, 2027","Jul 28, 2027",Jul 21–Jul 28,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0728,"Jul 28, 2027","Aug 4, 2027",Jul 28–Aug 4,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0804,"Aug 4, 2027","Aug 11, 2027",Aug 4–Aug 11,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0811,"Aug 11, 2027","Aug 18, 2027",Aug 11–Aug 18,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0818,"Aug 18, 2027","Aug 25, 2027",Aug 18–Aug 25,,BOOKED,FALSE,"Aug 6, 2026"',
+    '2027-W0825,"Aug 25, 2027","Sep 1, 2027",Aug 25–Sep 1,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0901,"Sep 1, 2027","Sep 8, 2027",Sep 1–Sep 8,Labor Day (Mon Sep 6),AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0908,"Sep 8, 2027","Sep 15, 2027",Sep 8–Sep 15,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0915,"Sep 15, 2027","Sep 22, 2027",Sep 15–Sep 22,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0922,"Sep 22, 2027","Sep 29, 2027",Sep 22–Sep 29,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W0929,"Sep 29, 2027","Oct 6, 2027",Sep 29–Oct 6,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W1006,"Oct 6, 2027","Oct 13, 2027",Oct 6–Oct 13,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W1013,"Oct 13, 2027","Oct 20, 2027",Oct 13–Oct 20,,AVAILABLE,TRUE,"Aug 6, 2026"',
+    '2027-W1020,"Oct 20, 2027","Oct 27, 2027",Oct 20–Oct 27,,AVAILABLE,TRUE,"Aug 6, 2026"'
+  ].join('\n');
 
   document.getElementById('cta-inquiry').addEventListener('click', function () {
     trackClick('inquiry_top', 'google_form');
@@ -696,7 +724,12 @@
       })
       .catch(function(error) {
         console.warn('Availability feed could not be loaded', error);
-        showAvailabilityError();
+        try {
+          renderWeeks(sheetRowsToWeeks(parseCsv(availabilityCsvFallback)));
+        } catch (fallbackError) {
+          console.warn('Embedded availability fallback could not be loaded', fallbackError);
+          showAvailabilityError();
+        }
       });
   })();
 

@@ -157,3 +157,12 @@ These were observed from the cloned source and have not been fixed unless a late
 - The supplied 2027 feed rendered all 25 rows from May through October during verification. It currently contains available and booked rows but no held row; held rendering is implemented from the status value and palette.
 - Verified the real CSV transformation, holiday labels, disabled booked controls, selected-week detail, desktop layout, and a 390-pixel mobile layout in a local browser preview.
 - `python3 scripts/check_site.py`, `git diff --check`, and inline JavaScript syntax validation passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.
+
+### 2026-08-09 — Availability preview fallback
+
+- Adam reported that the new availability section showed only its contact fallback instead of the season ribbon in the preview he was viewing.
+- Confirmed the module markup was present but that preview could not reach Google’s CSV. Also confirmed the public `www.91teal.com` page still served the older iframe version because the local branch had not been published.
+- Added an embedded last-known-good copy of the same reviewed public CSV to `index.html`. The module now prefers the live Google feed and automatically renders the embedded copy only when the network request fails.
+- The embedded copy retains the public feed’s `last_updated` value so visitors can see its freshness. It contains no tenant, contact, payment, or private lease data.
+- Forced the Google request to fail during local testing and verified the ribbon still rendered 25 weeks, hid the error message, and showed `Updated Aug 6, 2026`. Restored the real Google URL and reverified the same result.
+- This resiliency change remains local and unpublished.
