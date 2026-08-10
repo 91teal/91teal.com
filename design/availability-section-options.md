@@ -1,8 +1,8 @@
 # Availability Section Design Options
 
-Status: Option 2 selected and implemented locally; the live site has not been published with the change.
+Status: Option 2 selected and implemented locally with multi-week selection; the live site has not been published with the change.
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-10
 
 ## Existing section and aesthetic
 
@@ -104,4 +104,24 @@ Tradeoffs:
 
 ## Implementation status
 
-The local branch now replaces the iframe with semantic markup, a small dependency-free CSV parser and renderer, responsive season-ribbon styles, selected-week inquiry detail, and a resilient fallback state. The real public feed, event labels, status controls, desktop layout, and 390-pixel mobile layout have been verified. Publishing remains a separate approval step.
+The local branch now replaces the iframe with semantic markup, a small dependency-free CSV parser and renderer, responsive season-ribbon styles, a multi-week selection summary, and a resilient fallback state. The real public feed, event labels, status controls, desktop layout, and 375-pixel mobile layout have been verified. Publishing remains a separate approval step.
+
+## Multi-week selection (2026-08-10)
+
+The single-week detail panel below the ribbon was replaced by a persistent selection summary **above** the ribbon:
+
+- Tiles toggle on and off; any number of weeks can be held at once.
+- The summary shows a live count, one removable chip per selected week, and stays visible with an empty state so the ribbon does not shift when the first week is picked.
+- Selection order is preserved and carried into the form payload, so the first week clicked reads first.
+- Weeks are identified by the feed's `week_id`, falling back to the start date when that column is absent.
+- `Clear selection` appears only when something is selected; `Request these weeks` is disabled until then.
+
+A season heading (`2027 Season`, or `2027–2028 Season` if a feed ever spans two years) sits between the summary and the ribbon. Month headings intentionally stay bare (`May`, `June`) because the season heading carries the year.
+
+The selected weeks are passed to a purpose-built Google Form. See `week-interest-form-spec.md`; the existing 2026 form's hardcoded week grid cannot accept a dynamic payload.
+
+## Feed safety rules
+
+- A blank or unrecognized `status` resolves to `unavailable` (neutral, disabled, labelled "Unavailable"), never to `available`. An unfilled sheet row must not advertise itself as bookable.
+- Only `available` and `held` weeks are ever selectable, and `requestable` can further restrict but never expand that.
+- The embedded fallback CSV is only rendered when its `last_updated` value parses and is within 45 days. Past that the contact message shows instead, because a frozen snapshot is more likely to misstate availability than to help.

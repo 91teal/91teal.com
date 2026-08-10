@@ -2,7 +2,7 @@
 
 This is the durable memory for work on the 91 Teal website. Read it with `README.md` and `AGENTS.md` before making changes. Update it whenever new site knowledge, decisions, open questions, verification results, or publishing state are learned.
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## Identity and repository
 
@@ -33,6 +33,8 @@ The site should remain on GitHub Pages and retain its simple static architecture
 | `scripts/check_site.py` | Local and automated checks for anchors, referenced files, filename case, gallery images, CSS URLs, and `CNAME`. |
 | `.github/workflows/check-site.yml` | Runs the static-site checker on pull requests and selected pushes after it is published to GitHub. |
 | `design/availability-section-options.md` | Saved assessment, CSV data contract, and three replacement concepts for the availability section. |
+| `design/week-interest-form-spec.md` | Build spec for the new week-interest Google Form, and the two values needed to switch prefill on. |
+| `.claude/launch.json` | Preview-server definition used by the Claude Code browser preview. Local tooling only; not served content. |
 
 ## Current page structure
 
@@ -84,6 +86,8 @@ Do not infer new rates, availability, policies, amenities, legal terms, or renov
 
 ## Workflow decisions
 
+- Adam's direction on 2026-08-10: the site is managed **on GitHub**, not in the local clone. Branches should be pushed and reviewed as pull requests so CI runs and the diff is reviewable, with merging to `main` still gated on his explicit approval. The local preview drops to a pre-push visual check rather than the system of record. This is blocked until `gh` is installed and authenticated.
+- GitHub Pages has no per-branch preview URLs, so a local preview remains the only way to see a change before it is public. That justifies previewing locally; it does not justify keeping branches unpushed.
 - Work in descriptive `codex/<slug>` branches based on an up-to-date `main`.
 - Preview through `./scripts/serve.sh`; run `python3 scripts/check_site.py` after material edits.
 - Review changes before publishing. Editing or previewing does not authorize pushing, opening a pull request, merging, or deploying.
@@ -103,6 +107,11 @@ These were observed from the cloned source and have not been fixed unless a late
 - The lightbox controls do not currently have explicit accessible labels, and focus management has not been verified.
 - Mobile and desktop visual QA of the cloned baseline has not yet been performed in this local workspace.
 - The live `main` page still embeds an older published sheet whose `gid=0` CSV returned `#REF!` on 2026-08-09. The local availability branch replaces that iframe with the newer public CSV module; the live issue remains until the website change is published.
+- No local git identity is configured, and there is no global one either. Commits made from this Windows workspace use the repository-local `user.name`/`user.email` set on 2026-08-10 to match existing history; Adam has not yet confirmed the identity he wants on public commits.
+- `gh` is not installed on this Windows machine, so no agent-side GitHub work (push, pull request, merge, Actions status, Pages status) is possible yet.
+- Five commits of finished availability work exist only in this local clone. They are not pushed, so `.github/workflows/check-site.yml` has never actually run on GitHub.
+- The published availability CSV currently contains only 2027 weeks. The existing Google Form is still titled `91 Teal 2026 Rental Interest` and lists 2026 weeks, so form and feed disagree about the season until the new form replaces it.
+- Chrome heuristically caches `styles.css` when it is served by `python -m http.server`, which sends `Last-Modified` but no `Cache-Control`. CSS edits can appear not to apply during preview. Verify CSS changes by refetching the file with a cache-busting query rather than trusting a plain reload.
 
 ## Activity log
 
@@ -166,3 +175,18 @@ These were observed from the cloned source and have not been fixed unless a late
 - The embedded copy retains the public feed’s `last_updated` value so visitors can see its freshness. It contains no tenant, contact, payment, or private lease data.
 - Forced the Google request to fail during local testing and verified the ribbon still rendered 25 weeks, hid the error message, and showed `Updated Aug 6, 2026`. Restored the real Google URL and reverified the same result.
 - This resiliency change remains local and unpublished.
+
+### 2026-08-10 — Session moved to Claude Code; multi-week selection built
+
+- Adam moved website work from the previous agent to Claude Code and asked that GitHub, not the local clone, be the place the site is managed. He also directed that work stay inside `Leases/Website` and not touch the parent lease workspace.
+- Reverified the live state: the published CSV returns HTTP 200 with `Access-Control-Allow-Origin: *` and 25 data rows, and `www.91teal.com` still serves the old Google Sheet iframe because the availability branch was never pushed.
+- Reviewed the existing Google Form (`91 Teal 2026 Rental Interest`). It collects name, email, phone, a hardcoded per-week High/Medium/Low grid, and a free-text question. The grid cannot accept a dynamic set of weeks, so Adam asked for a new form built from scratch using it as the style reference.
+- Fixed three defects in the availability module:
+  - Added a season heading (`2027 Season`) because no year appeared anywhere; a visitor in 2026 could read the 2027 weeks as 2026 dates. Two-year feeds render as a range.
+  - A blank or unrecognized `status` previously resolved to `available`, so an unfilled sheet row advertised itself as bookable. Unknown statuses now resolve to a disabled `unavailable` state.
+  - The embedded fallback is now only rendered when its `last_updated` parses and is within 45 days, so a frozen snapshot cannot silently advertise stale availability.
+- Replaced single-week selection with multi-week selection. A persistent summary sits above the ribbon with a live count, removable chips, `Clear selection`, and a disabled-until-valid `Request these weeks` button. Selection order is preserved and weeks are keyed by the feed's `week_id`.
+- Wired the selected weeks into a Google Form prefill payload, gated behind `availabilityFormWeeksEntry`. That constant is intentionally empty until Adam supplies the real long form URL and entry id, so the button currently opens the existing form unprefilled rather than sending a broken link.
+- Saved `design/week-interest-form-spec.md` with the questions to create and the exact two values to send back.
+- Verified in a local browser preview: 25 tiles across six months, 21 selectable, `2027 Season` heading, select/deselect via tile and via chip, clear-all, correct counts, payload `May 26 – Jun 2, 2027 — Memorial Day (Mon May 31); Jul 14–21, 2027`, unconfigured button falling back to the plain form URL, status mapping across twelve inputs including blanks and typos, fallback age accepted at 4 days and rejected at 1 year, plus desktop (1280px) and mobile (375px) layouts with no horizontal overflow.
+- `python scripts/check_site.py` and `git diff --check` passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.

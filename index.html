@@ -277,23 +277,28 @@
         <div class="section-card">
           <h2 class="section-title">Check dates</h2>
           <p class="section-body">
-            Browse the remaining Wednesday-to-Wednesday weeks below. Final confirmations are shared directly with the host.
+            Pick the Wednesday-to-Wednesday weeks you are interested in. Select as many as you like, then send them over together. Final confirmations are shared directly with the host.
           </p>
           <div class="availability-module">
             <div id="availability-loading" class="availability-message" role="status" aria-live="polite">Loading availability…</div>
+            <div id="availability-selection" class="availability-selection" hidden>
+              <div class="availability-selection-main">
+                <div id="availability-selection-count" class="availability-selection-count" role="status" aria-live="polite">No weeks selected yet</div>
+                <ul id="availability-selection-list" class="availability-selection-list"></ul>
+                <p id="availability-selection-hint" class="availability-selection-hint">Tap any available week below to add it here.</p>
+              </div>
+              <div class="availability-selection-actions">
+                <button id="availability-inquiry" class="btn-primary" type="button" disabled>Request these weeks</button>
+                <button id="availability-clear" class="btn-secondary" type="button" hidden>Clear selection</button>
+              </div>
+            </div>
+            <h3 id="availability-season" class="availability-season" hidden></h3>
             <div id="availability-ribbon" class="availability-ribbon" hidden></div>
             <div id="availability-legend" class="availability-legend" hidden>
               <span class="availability-status" data-status="available">Available</span>
               <span class="availability-status" data-status="held">On hold</span>
               <span class="availability-status" data-status="booked">Booked</span>
               <span id="availability-updated" class="availability-updated"></span>
-            </div>
-            <div id="availability-detail" class="availability-detail" aria-live="polite" hidden>
-              <div>
-                <div id="availability-detail-week" class="availability-detail-week"></div>
-                <div id="availability-detail-note" class="availability-detail-note"></div>
-              </div>
-              <button id="availability-inquiry" class="btn-primary">Inquire about these dates</button>
             </div>
           </div>
         </div>
@@ -400,6 +405,13 @@
   var googleFormUrl = "https://forms.gle/ENvfe7acgyBqA6zC8";
   var instagramUrl = "https://instagram.com/91teal";
   var availabilityCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTILWKAtDOEHzS5Q42moASNi1rsWPMP1_JciDLkNzNcdfBkaMVnLeNetT_u0X1h2JhqL-t0Sb2EdACn/pub?output=csv";
+
+  // Week-interest form. Both values must be copied from the new form's own
+  // "Get pre-filled link" output — do not guess the entry id. While
+  // availabilityFormWeeksEntry is empty the button opens the form unprefilled,
+  // so the section stays usable before the new form exists.
+  var availabilityFormUrl = googleFormUrl;
+  var availabilityFormWeeksEntry = "";
   var availabilityCsvFallback = [
     'week_id,start_date,end_date,dates,event,status,requestable,last_updated',
     '2027-W0505,"May 5, 2027","May 12, 2027",May 5–May 12,,AVAILABLE,TRUE,"Aug 6, 2026"',
@@ -449,12 +461,19 @@
     var loading = document.getElementById('availability-loading');
     var ribbon = document.getElementById('availability-ribbon');
     var legend = document.getElementById('availability-legend');
-    var detail = document.getElementById('availability-detail');
-    var detailWeek = document.getElementById('availability-detail-week');
-    var detailNote = document.getElementById('availability-detail-note');
+    var season = document.getElementById('availability-season');
+    var selection = document.getElementById('availability-selection');
+    var selectionCount = document.getElementById('availability-selection-count');
+    var selectionList = document.getElementById('availability-selection-list');
+    var selectionHint = document.getElementById('availability-selection-hint');
     var inquiryButton = document.getElementById('availability-inquiry');
+    var clearButton = document.getElementById('availability-clear');
     var updated = document.getElementById('availability-updated');
-    var selectedWeek = null;
+    var selectedWeeks = [];
+
+    // The embedded fallback is a frozen snapshot. Past this age it is more likely
+    // to misrepresent availability than to help, so the contact message wins.
+    var fallbackMaxAgeDays = 45;
 
     var monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -535,12 +554,22 @@
       return startMonth + ' ' + start.getDate() + ' – ' + endMonth + ' ' + end.getDate();
     }
 
+    // A blank or unrecognized status must never advertise a week as bookable, so
+    // anything the feed does not clearly state resolves to 'unavailable'.
     function normalizeStatus(value) {
       var status = value.trim().toLowerCase();
 
-      if (!status || status === 'available') return 'available';
+      if (status === 'available') return 'available';
       if (status.includes('hold') || status === 'held' || status === 'pending') return 'held';
-      return 'booked';
+      if (status === 'booked' || status === 'sold' || status === 'unavailable') return 'booked';
+      return 'unavailable';
+    }
+
+    function statusLabel(status) {
+      if (status === 'available') return 'Available';
+      if (status === 'held') return 'On hold';
+      if (status === 'booked') return 'Booked';
+      return 'Unavailable';
     }
 
     function findColumn(headers, names) {
@@ -567,6 +596,7 @@
       if (headerIndex < 0) throw new Error('Availability headers were not found.');
 
       var headers = rows[headerIndex];
+      var idColumn = findColumn(headers, ['week_id', 'id']);
       var holidayColumn = findColumn(headers, ['event', 'holiday week', 'holiday']);
       var dateColumn = findColumn(headers, ['start_date', 'check in date', 'check-in', 'check in']);
       var endDateColumn = findColumn(headers, ['end_date', 'check out date', 'check-out', 'check out']);
@@ -593,15 +623,20 @@
 
         var status = normalizeStatus(row[statusColumn] || '');
         var requestableValue = requestableColumn >= 0 ? (row[requestableColumn] || '').trim().toLowerCase() : '';
+        var selectableStatus = status === 'available' || status === 'held';
+        var rawId = idColumn >= 0 ? (row[idColumn] || '').trim() : '';
+        var key = (rawId || start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate())
+          .replace(/[^A-Za-z0-9_-]/g, '-');
 
         return {
+          key: key,
           start: start,
           end: end,
           holiday: holidayColumn >= 0 ? (row[holidayColumn] || '').trim() : '',
           status: status,
           requestable: requestableColumn < 0
-            ? status !== 'booked'
-            : ['true', 'yes', '1'].includes(requestableValue),
+            ? selectableStatus
+            : selectableStatus && ['true', 'yes', '1'].includes(requestableValue),
           lastUpdated: updatedColumn >= 0 ? (row[updatedColumn] || '').trim() : ''
         };
       }).filter(function(week) {
@@ -618,18 +653,88 @@
       };
     }
 
-    function selectWeek(week, button) {
-      ribbon.querySelectorAll('.availability-week[aria-pressed="true"]').forEach(function(activeButton) {
-        activeButton.setAttribute('aria-pressed', 'false');
+    function formatWeekWithYear(week) {
+      return formatDateRange(week.start, week.end) + ', ' + week.start.getFullYear();
+    }
+
+    function seasonLabel(weeks) {
+      var years = [];
+      weeks.forEach(function(week) {
+        var year = week.start.getFullYear();
+        if (years.indexOf(year) < 0) years.push(year);
+      });
+      years.sort(function(a, b) { return a - b; });
+
+      if (!years.length) return '';
+      if (years.length === 1) return years[0] + ' Season';
+      return years[0] + '–' + years[years.length - 1] + ' Season';
+    }
+
+    function indexOfSelected(week) {
+      for (var i = 0; i < selectedWeeks.length; i += 1) {
+        if (selectedWeeks[i].key === week.key) return i;
+      }
+      return -1;
+    }
+
+    function setWeekSelected(week, isSelected) {
+      var index = indexOfSelected(week);
+
+      if (isSelected && index < 0) selectedWeeks.push(week);
+      if (!isSelected && index >= 0) selectedWeeks.splice(index, 1);
+
+      var button = ribbon.querySelector('.availability-week[data-week-key="' + week.key + '"]');
+      if (button) button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+
+      renderSelection();
+    }
+
+    function renderSelection() {
+      var count = selectedWeeks.length;
+
+      selectionCount.textContent = count
+        ? count + (count === 1 ? ' week selected' : ' weeks selected')
+        : 'No weeks selected yet';
+      selectionHint.textContent = count
+        ? 'Send these over together, or keep adding weeks below.'
+        : 'Tap any available week below to add it here.';
+
+      selectionList.textContent = '';
+      selectedWeeks.forEach(function(week) {
+        var item = document.createElement('li');
+        item.className = 'availability-selection-week';
+        item.dataset.status = week.status;
+
+        var label = document.createElement('span');
+        label.textContent = formatWeekWithYear(week) + (week.holiday ? ' · ' + week.holiday : '');
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'availability-selection-remove';
+        remove.setAttribute('aria-label', 'Remove ' + formatWeekWithYear(week));
+        remove.textContent = '×';
+        remove.addEventListener('click', function() {
+          setWeekSelected(week, false);
+        });
+
+        item.append(label, remove);
+        selectionList.appendChild(item);
       });
 
-      button.setAttribute('aria-pressed', 'true');
-      selectedWeek = week;
-      detailWeek.textContent = formatDateRange(week.start, week.end) + (week.holiday ? ' · ' + week.holiday : '');
-      detailNote.textContent = week.status === 'held'
-        ? 'This week is currently on hold. Ask us about the waitlist.'
-        : 'This week is available. Rates are shared with your inquiry.';
-      detail.hidden = false;
+      inquiryButton.disabled = count === 0;
+      clearButton.hidden = count === 0;
+    }
+
+    function buildInquiryUrl() {
+      if (!availabilityFormWeeksEntry || !selectedWeeks.length) return availabilityFormUrl;
+
+      var value = selectedWeeks.map(function(week) {
+        return formatWeekWithYear(week) + (week.holiday ? ' — ' + week.holiday : '');
+      }).join('; ');
+
+      var separator = availabilityFormUrl.indexOf('?') >= 0 ? '&' : '?';
+      return availabilityFormUrl + separator + 'usp=pp_url&' +
+        availabilityFormWeeksEntry + '=' + encodeURIComponent(value);
     }
 
     function renderWeeks(data) {
@@ -651,7 +756,7 @@
         var monthRow = document.createElement('section');
         monthRow.className = 'availability-month';
 
-        var heading = document.createElement('h3');
+        var heading = document.createElement('h4');
         heading.className = 'availability-month-name';
         heading.textContent = monthNames[monthWeeks[0].start.getMonth()];
         monthRow.appendChild(heading);
@@ -664,13 +769,14 @@
           button.type = 'button';
           button.className = 'availability-week';
           button.dataset.status = week.status;
-          button.setAttribute('aria-pressed', 'false');
+          button.dataset.weekKey = week.key;
 
-          if (week.status === 'booked' || !week.requestable) {
+          if (!week.requestable) {
             button.disabled = true;
           } else {
+            button.setAttribute('aria-pressed', 'false');
             button.addEventListener('click', function() {
-              selectWeek(week, button);
+              setWeekSelected(week, indexOfSelected(week) < 0);
             });
           }
 
@@ -685,9 +791,7 @@
 
           var status = document.createElement('span');
           status.className = 'availability-week-status';
-          status.textContent = week.status === 'available'
-            ? 'Available'
-            : week.status === 'held' ? 'On hold' : 'Booked';
+          status.textContent = statusLabel(week.status);
 
           button.append(date, holiday, status);
           weekGrid.appendChild(button);
@@ -697,21 +801,48 @@
         ribbon.appendChild(monthRow);
       });
 
+      var label = seasonLabel(weeks);
+      season.textContent = label;
+      season.hidden = !label;
+
+      selectedWeeks = [];
+      renderSelection();
+
       loading.hidden = true;
       ribbon.hidden = false;
       legend.hidden = false;
+      selection.hidden = false;
       updated.textContent = data.lastUpdated ? 'Updated ' + data.lastUpdated : '';
     }
 
     function showAvailabilityError() {
       loading.textContent = 'Availability is being updated. Please contact hello@91teal.com for current dates.';
       loading.classList.add('availability-message-error');
+      loading.hidden = false;
+      season.hidden = true;
+      ribbon.hidden = true;
+      legend.hidden = true;
+      selection.hidden = true;
+    }
+
+    function fallbackIsUsable(data) {
+      var stamp = data.lastUpdated ? parseSheetDate(data.lastUpdated) : null;
+      if (!stamp) return false;
+
+      var ageDays = (new Date().getTime() - stamp.getTime()) / 86400000;
+      return ageDays <= fallbackMaxAgeDays;
     }
 
     inquiryButton.addEventListener('click', function() {
-      if (!selectedWeek) return;
-      trackClick('availability_week', 'google_form');
-      window.open(googleFormUrl, '_blank');
+      if (!selectedWeeks.length) return;
+      trackClick('availability_weeks_' + selectedWeeks.length, 'google_form');
+      window.open(buildInquiryUrl(), '_blank');
+    });
+
+    clearButton.addEventListener('click', function() {
+      selectedWeeks.slice().forEach(function(week) {
+        setWeekSelected(week, false);
+      });
     });
 
     fetch(availabilityCsvUrl, { cache: 'no-store' })
@@ -725,7 +856,11 @@
       .catch(function(error) {
         console.warn('Availability feed could not be loaded', error);
         try {
-          renderWeeks(sheetRowsToWeeks(parseCsv(availabilityCsvFallback)));
+          var fallbackData = sheetRowsToWeeks(parseCsv(availabilityCsvFallback));
+          if (!fallbackIsUsable(fallbackData)) {
+            throw new Error('Embedded availability fallback is too old to display.');
+          }
+          renderWeeks(fallbackData);
         } catch (fallbackError) {
           console.warn('Embedded availability fallback could not be loaded', fallbackError);
           showAvailabilityError();
