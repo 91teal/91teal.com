@@ -29,13 +29,17 @@ This repository is the public GitHub Pages site for 91 Teal Walk. These instruct
 
 ## Editing workflow
 
-1. Start from an up-to-date `main` and create a descriptive `codex/<slug>` branch before making requested site changes.
-2. Keep each branch focused on one user-visible change or one closely related set of changes.
-3. Preview with `./scripts/serve.sh` and run `python3 scripts/check_site.py`.
-4. For visual changes, verify desktop and narrow/mobile layouts. For interaction changes, test keyboard and touch-relevant behavior.
-5. Summarize the visible result and any content assumptions for Adam.
-6. Update `SITE_CONTEXT.md` with durable learnings and current verification/publishing state.
-7. Do not push, open a pull request, merge, or otherwise publish unless Adam asks for that action. A request to edit or preview is not publishing approval.
+Adam chose this workflow on 2026-08-10, replacing an earlier branch-and-pull-request process that added friction he never asked for. **Do not reintroduce branches or pull requests as a default.** He owns this site alone; a pull request is optional ceremony here.
+
+1. Work directly on `main` for ordinary changes. Branches are for genuinely risky or exploratory work only, and are not required otherwise.
+2. Make the change, then run `python scripts/check_site.py`.
+3. Preview with `python scripts/preview_server.py` and verify. For visual changes, check desktop and ~375px mobile. For interaction changes, check keyboard and touch behavior. Do not use plain `python -m http.server`; it lets the browser cache stale CSS.
+4. **Show Adam the result and wait for his OK before it goes live.** This is the one gate he wants: nothing reaches the public site unseen.
+5. On his OK, push to `main`. GitHub Pages publishes automatically in about a minute.
+6. Confirm the change is actually live by fetching `https://www.91teal.com/`, not by assuming the push worked.
+7. Update `SITE_CONTEXT.md` with durable learnings and the current verification/publishing state.
+
+Pushing to `main` publishes to the public site, so step 4 is not optional. If a change is purely internal — documentation, scripts, tooling that does not alter the rendered page — it may be pushed without a preview gate, but say so plainly when reporting it.
 
 ## Quality rules
 

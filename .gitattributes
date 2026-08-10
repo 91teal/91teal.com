@@ -1,0 +1,5 @@
+# scripts/check_site.py and scripts/serve.sh were committed with CRLF while
+# core.autocrlf is true, so git reported them as modified forever and blocked a
+# branch switch during the 2026-08-10 publish. Normalize them in the repository.
+scripts/*.py text
+scripts/*.sh text eol=lf

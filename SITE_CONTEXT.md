@@ -192,6 +192,15 @@ These were observed from the cloned source and have not been fixed unless a late
 - Verified in a local browser preview: 25 tiles across six months, 21 selectable, `2027 Season` heading, select/deselect via tile and via chip, clear-all, correct counts, payload `May 26 – Jun 2, 2027 — Memorial Day (Mon May 31); Jul 14–21, 2027`, unconfigured button falling back to the plain form URL, status mapping across twelve inputs including blanks and typos, fallback age accepted at 4 days and rejected at 1 year, plus desktop (1280px) and mobile (375px) layouts with no horizontal overflow.
 - `python scripts/check_site.py` and `git diff --check` passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.
 
+### 2026-08-10 — PUBLISHED: availability ribbon is live; workflow simplified
+
+- Adam pushed back on the branch-and-pull-request process, asking why the site was not simply being updated as he had asked. That process came from the previous agent's `AGENTS.md` and was not something he requested. He is the sole owner of this site, so a pull request adds no value here.
+- Adam's chosen workflow going forward: **work on `main`, show him the result, then publish on his OK.** No branches or pull requests by default. `AGENTS.md` has been rewritten accordingly, including an explicit instruction not to reintroduce them.
+- With his approval, fast-forwarded `main` from `316ad8e` to `1443daa` and pushed. **This replaced the live Google Sheets iframe with the season ribbon. 91teal.com is now changed.**
+- Verified on the real domain, not just locally: the live page fetches the published CSV successfully from `https://www.91teal.com` (HTTP 200, 25 rows, no fallback and no error state), renders `2027 Season` with 25 tiles and 21 selectable, starts with nothing selected, and multi-select, chips, and clear all work. The old spreadsheet iframe is gone.
+- The `Request these weeks` button still opens the existing 2026 form unprefilled, because the new form does not exist yet. This is unchanged from the previous live behavior, so publishing did not regress it.
+- Fixed a line-ending trap that blocked the publish: `scripts/check_site.py` and `scripts/serve.sh` were committed with CRLF while `core.autocrlf` is true, so git reported them as permanently modified and refused a branch switch. Added `.gitattributes` and renormalized them. Content is unchanged and `check_site.py` still passes.
+
 ### 2026-08-10 — First push to GitHub; OneDrive sync damage on a second machine
 
 - Adam moved to a second machine to get GitHub access. That machine's agent reported `.git` as damaged: every top-level file missing, only subdirectories surviving.
