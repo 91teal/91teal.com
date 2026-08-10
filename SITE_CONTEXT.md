@@ -109,8 +109,8 @@ These were observed from the cloned source and have not been fixed unless a late
 - Mobile and desktop visual QA of the cloned baseline has not yet been performed in this local workspace.
 - The live `main` page still embeds an older published sheet whose `gid=0` CSV returned `#REF!` on 2026-08-09. The local availability branch replaces that iframe with the newer public CSV module; the live issue remains until the website change is published.
 - No local git identity is configured, and there is no global one either. Commits made from this Windows workspace use the repository-local `user.name`/`user.email` set on 2026-08-10 to match existing history; Adam has not yet confirmed the identity he wants on public commits.
-- `gh` is not installed on this Windows machine, so no agent-side GitHub work (push, pull request, merge, Actions status, Pages status) is possible yet.
-- Five commits of finished availability work exist only in this local clone. They are not pushed, so `.github/workflows/check-site.yml` has never actually run on GitHub.
+- `gh` is not installed on this Windows machine. This does **not** block pushing: `git push` authenticates through the `manager` credential helper and works. `gh` is only needed for creating pull requests, merging, and querying Pages state. Actions results can be read unauthenticated from `api.github.com` because the repository is public.
+- The clone lives inside OneDrive, which is actively harmful to a git repository. On 2026-08-10 a second machine saw `.git` with every top-level file (`HEAD`, `config`, `index`, `packed-refs`) missing while subdirectories survived. The original clone was verified uncorrupted at the same moment, so this was an incomplete OneDrive sync, not repository damage. The working clone should be moved out of OneDrive.
 - The published availability CSV currently contains only 2027 weeks. The existing Google Form is still titled `91 Teal 2026 Rental Interest` and lists 2026 weeks, so form and feed disagree about the season until the new form replaces it.
 - Chrome heuristically cached `styles.css` when the preview was served by `python -m http.server`, which sends `Last-Modified` but no `Cache-Control`, so CSS edits could appear not to apply. Resolved on 2026-08-10 by `scripts/preview_server.py`, which strips the validators and sends `no-store`. If a preview ever looks stale again, confirm the preview is running that script and not plain `http.server`.
 
@@ -191,6 +191,17 @@ These were observed from the cloned source and have not been fixed unless a late
 - Saved `design/week-interest-form-spec.md` with the questions to create and the exact two values to send back.
 - Verified in a local browser preview: 25 tiles across six months, 21 selectable, `2027 Season` heading, select/deselect via tile and via chip, clear-all, correct counts, payload `May 26 – Jun 2, 2027 — Memorial Day (Mon May 31); Jul 14–21, 2027`, unconfigured button falling back to the plain form URL, status mapping across twelve inputs including blanks and typos, fallback age accepted at 4 days and rejected at 1 year, plus desktop (1280px) and mobile (375px) layouts with no horizontal overflow.
 - `python scripts/check_site.py` and `git diff --check` passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.
+
+### 2026-08-10 — First push to GitHub; OneDrive sync damage on a second machine
+
+- Adam moved to a second machine to get GitHub access. That machine's agent reported `.git` as damaged: every top-level file missing, only subdirectories surviving.
+- Verified the original clone was healthy at that moment: `git fsck --full` reported no corruption, all 7 refs present, all 9 commits reachable, `HEAD` at `679a824`. Because the two machines see the same folder, the asymmetry proves an incomplete OneDrive sync rather than repository corruption.
+- Created a verified backup at `C:\Users\a.thompson\91teal-git-backup\91teal-all.bundle` (outside OneDrive). `git bundle verify` reports a complete history with all 7 refs.
+- Established that `gh` was never required for pushing. `git push --dry-run` succeeded from the original machine, so the credential helper already holds working GitHub credentials. An earlier session note implying push was blocked was wrong.
+- With Adam's approval, pushed `codex/availability-section-concepts` to `origin`. Remote SHA `679a824` matches local `HEAD`. `origin/main` remains `316ad8e`, so the live site is unaffected.
+- `.github/workflows/check-site.yml` ran for the first time and passed: run `31434420729`, conclusion `success` on `679a824`.
+- No pull request has been opened, nothing has been merged, and 91teal.com is unchanged.
+- Outstanding: move the working clone out of OneDrive, and decide whether the branch is opened as one pull request or split.
 
 ### 2026-08-10 — Selection summary moved to the bottom
 
