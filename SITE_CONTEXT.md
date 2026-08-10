@@ -31,6 +31,7 @@ The site should remain on GitHub Pages and retain its simple static architecture
 | `index.html.old` | Historical page snapshot. It is not the canonical page but may still be directly reachable on GitHub Pages. |
 | `CNAME` | Must remain exactly `www.91teal.com` unless the domain is intentionally changed. |
 | `scripts/check_site.py` | Local and automated checks for anchors, referenced files, filename case, gallery images, CSS URLs, and `CNAME`. |
+| `scripts/preview_server.py` | No-cache local preview server. Use it instead of plain `python -m http.server` so edits are never masked by browser caching. |
 | `.github/workflows/check-site.yml` | Runs the static-site checker on pull requests and selected pushes after it is published to GitHub. |
 | `design/availability-section-options.md` | Saved assessment, CSV data contract, and three replacement concepts for the availability section. |
 | `design/week-interest-form-spec.md` | Build spec for the new week-interest Google Form, and the two values needed to switch prefill on. |
@@ -111,7 +112,7 @@ These were observed from the cloned source and have not been fixed unless a late
 - `gh` is not installed on this Windows machine, so no agent-side GitHub work (push, pull request, merge, Actions status, Pages status) is possible yet.
 - Five commits of finished availability work exist only in this local clone. They are not pushed, so `.github/workflows/check-site.yml` has never actually run on GitHub.
 - The published availability CSV currently contains only 2027 weeks. The existing Google Form is still titled `91 Teal 2026 Rental Interest` and lists 2026 weeks, so form and feed disagree about the season until the new form replaces it.
-- Chrome heuristically caches `styles.css` when it is served by `python -m http.server`, which sends `Last-Modified` but no `Cache-Control`. CSS edits can appear not to apply during preview. Verify CSS changes by refetching the file with a cache-busting query rather than trusting a plain reload.
+- Chrome heuristically cached `styles.css` when the preview was served by `python -m http.server`, which sends `Last-Modified` but no `Cache-Control`, so CSS edits could appear not to apply. Resolved on 2026-08-10 by `scripts/preview_server.py`, which strips the validators and sends `no-store`. If a preview ever looks stale again, confirm the preview is running that script and not plain `http.server`.
 
 ## Activity log
 
@@ -190,3 +191,10 @@ These were observed from the cloned source and have not been fixed unless a late
 - Saved `design/week-interest-form-spec.md` with the questions to create and the exact two values to send back.
 - Verified in a local browser preview: 25 tiles across six months, 21 selectable, `2027 Season` heading, select/deselect via tile and via chip, clear-all, correct counts, payload `May 26 – Jun 2, 2027 — Memorial Day (Mon May 31); Jul 14–21, 2027`, unconfigured button falling back to the plain form URL, status mapping across twelve inputs including blanks and typos, fallback age accepted at 4 days and rejected at 1 year, plus desktop (1280px) and mobile (375px) layouts with no horizontal overflow.
 - `python scripts/check_site.py` and `git diff --check` passed. Nothing was pushed, merged, or published, so 91teal.com remains unchanged.
+
+### 2026-08-10 — Selection summary moved to the bottom
+
+- Adam reviewed the preview and asked for the selection summary at the bottom of the section rather than the top. Section order is now season heading, ribbon, legend, selection summary.
+- Adam also reported weeks appearing pre-selected on open. Verified in an isolated fresh load that nothing is selected on load: zero pressed tiles, zero chips, `No weeks selected yet`, inquiry disabled, clear hidden. The pre-selected state he saw was leftover from agent test clicks in the shared preview tab, not site behavior. `renderWeeks` resets the selection on every draw.
+- Added `scripts/preview_server.py` after browser caching repeatedly masked CSS edits during verification, and pointed `.claude/launch.json` at it. Confirmed responses now carry `Cache-Control: no-store` with no `Last-Modified` or `ETag`.
+- Reverified after the move on a plain reload with no cache workaround: correct child order, summary below the ribbon and legend, nothing pre-selected, `2027 Season`, 25 weeks, and a 375-pixel mobile layout with stacked full-width buttons and no horizontal overflow.

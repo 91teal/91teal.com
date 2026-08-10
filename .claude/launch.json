@@ -4,7 +4,7 @@
     {
       "name": "91teal-preview",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8000"],
+      "runtimeArgs": ["scripts/preview_server.py", "8000"],
       "port": 8000
     }
   ]

@@ -281,17 +281,6 @@
           </p>
           <div class="availability-module">
             <div id="availability-loading" class="availability-message" role="status" aria-live="polite">Loading availability…</div>
-            <div id="availability-selection" class="availability-selection" hidden>
-              <div class="availability-selection-main">
-                <div id="availability-selection-count" class="availability-selection-count" role="status" aria-live="polite">No weeks selected yet</div>
-                <ul id="availability-selection-list" class="availability-selection-list"></ul>
-                <p id="availability-selection-hint" class="availability-selection-hint">Tap any available week below to add it here.</p>
-              </div>
-              <div class="availability-selection-actions">
-                <button id="availability-inquiry" class="btn-primary" type="button" disabled>Request these weeks</button>
-                <button id="availability-clear" class="btn-secondary" type="button" hidden>Clear selection</button>
-              </div>
-            </div>
             <h3 id="availability-season" class="availability-season" hidden></h3>
             <div id="availability-ribbon" class="availability-ribbon" hidden></div>
             <div id="availability-legend" class="availability-legend" hidden>
@@ -299,6 +288,17 @@
               <span class="availability-status" data-status="held">On hold</span>
               <span class="availability-status" data-status="booked">Booked</span>
               <span id="availability-updated" class="availability-updated"></span>
+            </div>
+            <div id="availability-selection" class="availability-selection" hidden>
+              <div class="availability-selection-main">
+                <div id="availability-selection-count" class="availability-selection-count" role="status" aria-live="polite">No weeks selected yet</div>
+                <ul id="availability-selection-list" class="availability-selection-list"></ul>
+                <p id="availability-selection-hint" class="availability-selection-hint">Tap any available week above to add it here.</p>
+              </div>
+              <div class="availability-selection-actions">
+                <button id="availability-inquiry" class="btn-primary" type="button" disabled>Request these weeks</button>
+                <button id="availability-clear" class="btn-secondary" type="button" hidden>Clear selection</button>
+              </div>
             </div>
           </div>
         </div>
@@ -696,8 +696,8 @@
         ? count + (count === 1 ? ' week selected' : ' weeks selected')
         : 'No weeks selected yet';
       selectionHint.textContent = count
-        ? 'Send these over together, or keep adding weeks below.'
-        : 'Tap any available week below to add it here.';
+        ? 'Send these over together, or keep adding weeks above.'
+        : 'Tap any available week above to add it here.';
 
       selectionList.textContent = '';
       selectedWeeks.forEach(function(week) {

@@ -108,15 +108,18 @@ The local branch now replaces the iframe with semantic markup, a small dependenc
 
 ## Multi-week selection (2026-08-10)
 
-The single-week detail panel below the ribbon was replaced by a persistent selection summary **above** the ribbon:
+The single-week detail panel was replaced by a persistent selection summary that closes the section, below the ribbon and legend. Adam reviewed an earlier version with the summary above the ribbon and asked for it at the bottom instead.
 
 - Tiles toggle on and off; any number of weeks can be held at once.
 - The summary shows a live count, one removable chip per selected week, and stays visible with an empty state so the ribbon does not shift when the first week is picked.
+- Nothing is selected on load. The renderer resets the selection every time it draws, so a reload always starts empty.
 - Selection order is preserved and carried into the form payload, so the first week clicked reads first.
 - Weeks are identified by the feed's `week_id`, falling back to the start date when that column is absent.
 - `Clear selection` appears only when something is selected; `Request these weeks` is disabled until then.
 
-A season heading (`2027 Season`, or `2027–2028 Season` if a feed ever spans two years) sits between the summary and the ribbon. Month headings intentionally stay bare (`May`, `June`) because the season heading carries the year.
+A season heading (`2027 Season`, or `2027–2028 Season` if a feed ever spans two years) sits above the ribbon. Month headings intentionally stay bare (`May`, `June`) because the season heading carries the year.
+
+Section order is: season heading, ribbon, legend, selection summary.
 
 The selected weeks are passed to a purpose-built Google Form. See `week-interest-form-spec.md`; the existing 2026 form's hardcoded week grid cannot accept a dynamic payload.
 
