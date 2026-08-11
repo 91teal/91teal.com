@@ -402,16 +402,17 @@
     window.addEventListener('scroll', checkScroll);
   })();
 
-  var googleFormUrl = "https://forms.gle/ENvfe7acgyBqA6zC8";
+  var googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeyb3Sc93TWQ4cn5lgYTIGilZPN7VEvyOfsfQrzq6cTDguQiA/viewform";
   var instagramUrl = "https://instagram.com/91teal";
   var availabilityCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTILWKAtDOEHzS5Q42moASNi1rsWPMP1_JciDLkNzNcdfBkaMVnLeNetT_u0X1h2JhqL-t0Sb2EdACn/pub?output=csv";
 
-  // Week-interest form. Both values must be copied from the new form's own
-  // "Get pre-filled link" output — do not guess the entry id. While
-  // availabilityFormWeeksEntry is empty the button opens the form unprefilled,
-  // so the section stays usable before the new form exists.
+  // Week-interest form. Every inquiry CTA on the page points at this one form,
+  // so all responses land in a single sheet. Both values below were read from
+  // the form's own prefilled-link output, never hand-written. The long
+  // /forms/d/e/.../viewform URL is required: a forms.gle short link can drop
+  // prefill parameters on redirect.
   var availabilityFormUrl = googleFormUrl;
-  var availabilityFormWeeksEntry = "";
+  var availabilityFormWeeksEntry = "entry.586370353";
   var availabilityCsvFallback = [
     'week_id,start_date,end_date,dates,event,status,requestable,last_updated',
     '2027-W0505,"May 5, 2027","May 12, 2027",May 5–May 12,,AVAILABLE,TRUE,"Aug 6, 2026"',
