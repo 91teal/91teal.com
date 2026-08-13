@@ -2,7 +2,7 @@
 
 This is the durable memory for work on the 91 Teal website. Read it with `README.md` and `AGENTS.md` before making changes. Update it whenever new site knowledge, decisions, open questions, verification results, or publishing state are learned.
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 
 ## Identity and repository
 
@@ -63,13 +63,38 @@ The exact identifiers and URLs live in `index.html`; consult the file before cha
 | Meta Pixel | Page-view and lead/contact tracking |
 | Google Maps embed | Property-location map |
 | Published Google Sheet | Public CSV source for the custom availability ribbon on the local implementation branch; the exact URL lives in `index.html` |
-| Google Form | Booking inquiry destination |
+| Google Form | Single inquiry destination for all three CTAs. See "Week-interest form" below |
 | Instagram `@91teal` | External photo/social destination |
 | YouTube | Embedded house walkthrough |
 | Schema.org JSON-LD | `VacationRental` structured data |
 | Open Graph and X/Twitter metadata | Link-preview content |
 
 Do not change these integrations or their public client-side identifiers without a request that specifically affects them. Never copy private credentials from the parent lease workspace into this repository.
+
+## Week-interest form
+
+Created 2026-08-10 in Adam's **adam.m.tho@gmail.com** account, replacing `91 Teal 2026 Rental Interest`. Title is deliberately season-neutral so it does not need renaming each year.
+
+| Item | Value |
+|---|---|
+| Title | `91 Teal Rental Interest` |
+| Public URL | `https://docs.google.com/forms/d/e/1FAIpQLSeyb3Sc93TWQ4cn5lgYTIGilZPN7VEvyOfsfQrzq6cTDguQiA/viewform` |
+| Edit URL | `https://docs.google.com/forms/d/1c0wL9FLM1mT4q30IENd5dg-a3CvmLz1Xdxjd-W-D8EM/edit` |
+| Weeks question entry id | `entry.586370353` |
+| Questions | Name, email, phone (short answer); Weeks you selected (paragraph); How firm is your interest? (multiple choice); free-text notes (paragraph). All required |
+| Interest options | `Ready to book now`, `Strong interest`, `Just exploring` |
+
+Rules that must survive future edits:
+
+- Use the long `docs.google.com/forms/d/e/.../viewform` URL. A `forms.gle` short link can drop prefill parameters on redirect.
+- **Never hand-write or guess the entry id.** It must come from a real prefilled URL (form editor **⋮ → Get pre-filled link**, or `toPrefilledUrl()` in Apps Script).
+- The weeks question must stay a **Paragraph**. Several weeks do not fit on one line.
+- Deleting and recreating the form changes both the URL and the entry id, so `index.html` must be updated in the same change.
+- Keep the form's responses away from the published availability sheet. The availability CSV is public; responses contain names, emails, and phone numbers. As of 2026-08-11 the form has no linked response spreadsheet — responses live in the form itself, which satisfies this.
+
+Adam's direction on 2026-08-11: **all three inquiry CTAs point at this one form**, so every inquiry lands in one place. The two generic "Request dates and rates" buttons open it with the weeks field empty and the visitor types their own weeks; only the availability section's "Request these weeks" prefills. Both paths are intended.
+
+The form was built by a throwaway Apps Script project (`Untitled project`, owned by `adam.m.tho@gmail.com`, script id `1l0BcLUEUVM1l16H-P89amI8BGkYE9BZWL8xFGXmTBh3_1uuMuRpuzObZ`) that calls `FormApp.create`. It has served its purpose; deleting it does not affect the form. Do not re-run `create91TealForm` — each run creates another duplicate form.
 
 ## Existing public content facts
 
@@ -87,11 +112,12 @@ Do not infer new rates, availability, policies, amenities, legal terms, or renov
 
 ## Workflow decisions
 
-- Adam's direction on 2026-08-10: the site is managed **on GitHub**, not in the local clone. Branches should be pushed and reviewed as pull requests so CI runs and the diff is reviewable, with merging to `main` still gated on his explicit approval. The local preview drops to a pre-push visual check rather than the system of record. This is blocked until `gh` is installed and authenticated.
-- GitHub Pages has no per-branch preview URLs, so a local preview remains the only way to see a change before it is public. That justifies previewing locally; it does not justify keeping branches unpushed.
-- Work in descriptive `codex/<slug>` branches based on an up-to-date `main`.
-- Preview through `./scripts/serve.sh`; run `python3 scripts/check_site.py` after material edits.
-- Review changes before publishing. Editing or previewing does not authorize pushing, opening a pull request, merging, or deploying.
+- **Current workflow (Adam's decision, 2026-08-10, supersedes everything below it):** work directly on `main`, show him the result, publish on his OK. **No branches and no pull requests by default** — he owns this site alone and explicitly rejected that ceremony as friction he never asked for. Do not reintroduce it. `AGENTS.md` is the authority.
+- Publishing **is** pushing to `main`. GitHub Pages redeploys in about a minute. There is no staging environment.
+- Superseded on 2026-08-10 (kept for history, do not act on): an earlier direction to work in `codex/<slug>` branches, push them, and review as pull requests before merging.
+- GitHub Pages has no per-branch preview URLs, so a local preview is the only way to see a change before it is public.
+- Preview through `python scripts/preview_server.py 8000`; run `python scripts/check_site.py` after material edits.
+- Review changes before publishing. Editing or previewing does not authorize pushing or deploying.
 - Preserve the dependency-free structure unless a change genuinely requires more machinery and Adam approves it.
 - Keep site-specific knowledge in this file rather than only in conversations.
 
@@ -107,11 +133,14 @@ These were observed from the cloned source and have not been fixed unless a late
 - `trackFormSubmission()` exists in `index.html`, but the inquiry buttons open an external Google Form, so the site itself does not observe a successful form submission.
 - The lightbox controls do not currently have explicit accessible labels, and focus management has not been verified.
 - Mobile and desktop visual QA of the cloned baseline has not yet been performed in this local workspace.
-- The live `main` page still embeds an older published sheet whose `gid=0` CSV returned `#REF!` on 2026-08-09. The local availability branch replaces that iframe with the newer public CSV module; the live issue remains until the website change is published.
+- ~~The live `main` page still embeds an older published sheet whose `gid=0` CSV returned `#REF!`.~~ Resolved 2026-08-10: the iframe is gone from the live page, replaced by the CSV-driven season ribbon.
 - No local git identity is configured, and there is no global one either. Commits made from this Windows workspace use the repository-local `user.name`/`user.email` set on 2026-08-10 to match existing history; Adam has not yet confirmed the identity he wants on public commits.
 - `gh` is not installed on this Windows machine. This does **not** block pushing: `git push` authenticates through the `manager` credential helper and works. `gh` is only needed for creating pull requests, merging, and querying Pages state. Actions results can be read unauthenticated from `api.github.com` because the repository is public.
 - The clone lives inside OneDrive, which is actively harmful to a git repository. On 2026-08-10 a second machine saw `.git` with every top-level file (`HEAD`, `config`, `index`, `packed-refs`) missing while subdirectories survived. The original clone was verified uncorrupted at the same moment, so this was an incomplete OneDrive sync, not repository damage. The working clone should be moved out of OneDrive.
-- The published availability CSV currently contains only 2027 weeks. The existing Google Form is still titled `91 Teal 2026 Rental Interest` and lists 2026 weeks, so form and feed disagree about the season until the new form replaces it.
+- ~~The published availability CSV contains only 2027 weeks while the Google Form is titled `91 Teal 2026 Rental Interest`, so form and feed disagree about the season.~~ Resolved 2026-08-11 by Adam: **2027 is the season being sold, and the CSV feed is the source of truth.** Everything in the old 2026 form was only ever an example. The new season-neutral form carries no year at all, so this cannot recur.
+- The old form `91 Teal 2026 Rental Interest` (`https://forms.gle/ENvfe7acgyBqA6zC8`) is no longer linked from the site but is still live and still accepting responses anywhere that short link was shared. Adam was advised on 2026-08-11 to close it to responses; not confirmed done.
+- Adam's Chrome has two Google accounts signed in. Apps Script and Drive URLs need an explicit account index: **`/u/1/` is `adam.m.tho@gmail.com`** (which owns the form) and `/u/0/` is his work account `a.thompson@cadogantate.com`. A bare `script.google.com/home/projects/<id>/edit` can redirect to the wrong account and show "Page Not Found".
+- The embedded fallback CSV in `index.html` is drifting from the live feed. As of 2026-08-11 the live feed labels Jul 14–21, 2027 as `Dance Festival (TBC)`, which the snapshot does not contain. The 45-day freshness gate still accepts the snapshot (`Aug 6, 2026`), so this is cosmetic, but the snapshot expires around 2026-09-20 and will then stop rendering.
 - Chrome heuristically cached `styles.css` when the preview was served by `python -m http.server`, which sends `Last-Modified` but no `Cache-Control`, so CSS edits could appear not to apply. Resolved on 2026-08-10 by `scripts/preview_server.py`, which strips the validators and sends `no-store`. If a preview ever looks stale again, confirm the preview is running that script and not plain `http.server`.
 
 ## Activity log
@@ -218,3 +247,20 @@ These were observed from the cloned source and have not been fixed unless a late
 - Adam also reported weeks appearing pre-selected on open. Verified in an isolated fresh load that nothing is selected on load: zero pressed tiles, zero chips, `No weeks selected yet`, inquiry disabled, clear hidden. The pre-selected state he saw was leftover from agent test clicks in the shared preview tab, not site behavior. `renderWeeks` resets the selection on every draw.
 - Added `scripts/preview_server.py` after browser caching repeatedly masked CSS edits during verification, and pointed `.claude/launch.json` at it. Confirmed responses now carry `Cache-Control: no-store` with no `Last-Modified` or `ETag`.
 - Reverified after the move on a plain reload with no cache workaround: correct child order, summary below the ribbon and legend, nothing pre-selected, `2027 Season`, 25 weeks, and a 375-pixel mobile layout with stacked full-width buttons and no horizontal overflow.
+
+### 2026-08-11 — PUBLISHED: week-interest form built and wired into every CTA
+
+- Built the replacement form `91 Teal Rental Interest` in `adam.m.tho@gmail.com` with Apps Script rather than the Forms editor UI, because `toPrefilledUrl()` returns the real entry id directly and removes any temptation to guess it. See "Week-interest form" above for its URLs and entry id.
+- Adam clicked the OAuth consent himself; the agent did not. Exactly one `create91TealForm` execution ran (Completed, 6.5 s), so exactly one form exists.
+- **Two decisions Adam made:**
+  - All three inquiry CTAs point at the new form, not just the availability section. Responses land in one place instead of split across two forms.
+  - 2027 is the season being sold and the CSV feed is the source of truth. The old 2026 form was only ever an example.
+- Extended the weeks question's help text beyond the spec to cover the direct-arrival path Adam described: "Prefilled from the website — edit if you want to add or remove weeks. If you came here directly, list the weeks you're interested in." The question is required, so visitors arriving from the generic CTAs need to know what to type.
+- Verified the prefill genuinely lands in the field, not just that the URL looked right: loading the site-generated URL put `May 26 – Jun 2, 2027 — Memorial Day (Mon May 31); Jul 14–21, 2027 — Dance Festival (TBC)` into the weeks textarea with en/em dashes intact and every other field untouched. The form is publicly reachable with no Google session.
+- Confirmed the form's shape from the rendered page: six questions in order, all required, two `<textarea>` elements (weeks and notes) and three text inputs, and the three interest options.
+- Also verified: nothing selected on a fresh load, 25 tiles over six months with 21 selectable, chip removal from a three-week selection leaving the correct two in click order, clear-all resetting to the disabled state, and the two generic CTAs opening the form with the weeks field empty. No horizontal overflow at 1280×800 or 375×812, buttons stacked on mobile. `python scripts/check_site.py` and `git diff --check` passed.
+- Could not capture screenshots this session — the browser preview pane was hidden, so the page was not compositing frames. Verification was measurement-based via the DOM instead, which covered the same claims.
+- **Published on Adam's word: pushed `a9192e9..7b43e87` to `main`.** Confirmed live rather than assumed: `https://www.91teal.com/` serves the new form URL and `entry.586370353`, the only remaining `forms.gle` string is inside a source comment, and a click-through on the real domain produced the correct prefilled URL.
+- Deleted the obsolete untracked `HANDOFF.md`. It described a branch-and-pull-request workflow Adam had already rejected and work that was already published, and its own header said it could be deleted.
+- Rewrote the stale "Workflow decisions" section above, which still instructed future agents to use `codex/<slug>` branches and pull requests. That contradicted `AGENTS.md` and would have led a fresh session to reintroduce exactly the friction Adam removed.
+- Open follow-ups for Adam: close the old 2026 form to responses, and decide whether to trash the throwaway `Untitled project` Apps Script project.

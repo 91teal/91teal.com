@@ -1,8 +1,10 @@
 # Week Interest Form — build spec
 
-Status: awaiting form creation. The website is already wired and will prefill as soon as the two values in "What to send back" are filled in.
+Status: **DONE — built and live.** The form exists, the site is wired to it, and prefill was verified end to end on `https://www.91teal.com/` on 2026-08-11.
 
-Last reviewed: 2026-08-10
+This file is kept as the record of why the form is shaped the way it is. The form's live URLs, entry id, and the rules that must survive future edits are in `SITE_CONTEXT.md` under "Week-interest form" — that is the authority now, not the "What to send back" section below.
+
+Last reviewed: 2026-08-11
 
 ## Why a new form
 
@@ -44,14 +46,15 @@ Two values, both from the form itself — do not hand-write either one:
 1. **The long form URL.** Open the form, click **Send**, choose the link tab, and untick "Shorten URL". It looks like `https://docs.google.com/forms/d/e/<LONG_ID>/viewform`. A `forms.gle` short link is not reliable here because prefill parameters can be dropped on redirect.
 2. **The `entry` id for question 4.** In the form editor: **⋮ → Get pre-filled link**, type `PLACEHOLDER` into the Weeks field only, click **Get link**, then copy it. The result contains `entry.1234567890=PLACEHOLDER`; the `entry.1234567890` part is what is needed.
 
-Paste both to Claude and they go into `index.html`:
+Both values were obtained on 2026-08-10 and are now in `index.html`:
 
 ```js
-var availabilityFormUrl = "https://docs.google.com/forms/d/e/<LONG_ID>/viewform";
-var availabilityFormWeeksEntry = "entry.<id from the pre-filled link>";
+var googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeyb3Sc93TWQ4cn5lgYTIGilZPN7VEvyOfsfQrzq6cTDguQiA/viewform";
+var availabilityFormUrl = googleFormUrl;
+var availabilityFormWeeksEntry = "entry.586370353";
 ```
 
-Until then `availabilityFormWeeksEntry` stays empty and the button opens the current form with nothing prefilled, so the section is never broken while the form is being built.
+In practice they came from Apps Script's `toPrefilledUrl()` rather than the editor menu, which is the more reliable route — see the activity log entry for 2026-08-11 in `SITE_CONTEXT.md`.
 
 ## Response handling
 
