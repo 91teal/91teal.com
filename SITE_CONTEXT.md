@@ -35,6 +35,7 @@ The site should remain on GitHub Pages and retain its simple static architecture
 | `.github/workflows/check-site.yml` | Runs the static-site checker on pull requests and selected pushes after it is published to GitHub. |
 | `design/availability-section-options.md` | Saved assessment, CSV data contract, and three replacement concepts for the availability section. |
 | `design/week-interest-form-spec.md` | Build spec for the new week-interest Google Form, and the two values needed to switch prefill on. |
+| `docs/when-a-week-sells.md` | Runbook for keeping the availability sheet and the form's week checkboxes aligned by hand. Written to be executed by the separate lease-signing workflow. |
 | `.claude/launch.json` | Preview-server definition used by the Claude Code browser preview. Local tooling only; not served content. |
 
 ## Current page structure
@@ -93,6 +94,16 @@ Rules that must survive future edits:
 - Keep the form's responses away from the published availability sheet. The availability CSV is public; responses contain names, emails, and phone numbers. As of 2026-08-11 the form has no linked response spreadsheet — responses live in the form itself, which satisfies this.
 
 Adam's direction on 2026-08-11: **all three inquiry CTAs point at this one form**, so every inquiry lands in one place. The two generic "Request dates and rates" buttons open it with the weeks field empty and the visitor types their own weeks; only the availability section's "Request these weeks" prefills. Both paths are intended.
+
+### Verified behaviour of Google Forms prefill (tested 2026-08-13 on a throwaway form)
+
+- **Checkbox questions can be prefilled**, including several boxes at once: repeat the same `entry.<id>=<option text>` parameter once per box.
+- **The match must be exact, character for character.** A value matching no option is **silently discarded** — no error shown, nothing recorded. This is the dominant risk in any checkbox design.
+- An `Other` box can be prefilled with arbitrary text via `entry.<id>=__other_option__` plus `entry.<id>.other_option_response=<text>`.
+- Google strips `usp=pp_url` from the URL on load. Prefill still works without it.
+- **Do not trust `aria-checked` when inspecting a rendered Google Form** — it reads `false` even for a box that was just clicked. The reliable state is the hidden `input[name="entry.<id>"]` elements, one per selected value.
+
+Adam's decision on 2026-08-13: keep sheet-to-form alignment **manual**, with no sync script. Most visitors arrive through the website, which reads the CSV live and is always accurate, and a request for an already-sold week is still a lead worth having. The procedure is `docs/when-a-week-sells.md`; the ordering rule in it (sheet before form) is what keeps the manual approach safe.
 
 The form was built by a throwaway Apps Script project (`Untitled project`, owned by `adam.m.tho@gmail.com`, script id `1l0BcLUEUVM1l16H-P89amI8BGkYE9BZWL8xFGXmTBh3_1uuMuRpuzObZ`) that calls `FormApp.create`. It has served its purpose; deleting it does not affect the form. Do not re-run `create91TealForm` — each run creates another duplicate form.
 
