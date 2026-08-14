@@ -412,7 +412,7 @@
   // /forms/d/e/.../viewform URL is required: a forms.gle short link can drop
   // prefill parameters on redirect.
   var availabilityFormUrl = googleFormUrl;
-  var availabilityFormWeeksEntry = "entry.586370353";
+  var availabilityFormWeeksEntry = "entry.1418677425";
   var availabilityCsvFallback = [
     'week_id,start_date,end_date,dates,event,status,requestable,last_updated',
     '2027-W0505,"May 5, 2027","May 12, 2027",May 5–May 12,,AVAILABLE,TRUE,"Aug 6, 2026"',
@@ -726,16 +726,25 @@
       clearButton.hidden = count === 0;
     }
 
+    // The form's weeks question is a checkbox list, so each selected week is
+    // sent as its own repeated copy of the same entry parameter.
+    //
+    // The value must match a checkbox option character for character or Google
+    // silently discards it — no error to the visitor, nothing in the response.
+    // So this deliberately sends the date range alone and drops the holiday
+    // label: holiday text comes from the feed's event column and gets edited
+    // mid-season, which would break the match for that week. Holidays are still
+    // shown on the tiles and chips, they just are not part of the matched value.
+    // See docs/when-a-week-sells.md.
     function buildInquiryUrl() {
       if (!availabilityFormWeeksEntry || !selectedWeeks.length) return availabilityFormUrl;
 
-      var value = selectedWeeks.map(function(week) {
-        return formatWeekWithYear(week) + (week.holiday ? ' — ' + week.holiday : '');
-      }).join('; ');
+      var params = selectedWeeks.map(function(week) {
+        return availabilityFormWeeksEntry + '=' + encodeURIComponent(formatWeekWithYear(week));
+      });
 
       var separator = availabilityFormUrl.indexOf('?') >= 0 ? '&' : '?';
-      return availabilityFormUrl + separator + 'usp=pp_url&' +
-        availabilityFormWeeksEntry + '=' + encodeURIComponent(value);
+      return availabilityFormUrl + separator + 'usp=pp_url&' + params.join('&');
     }
 
     function renderWeeks(data) {
