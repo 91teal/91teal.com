@@ -25,7 +25,7 @@ Keep the existing intro copy and the about-the-house blurb from the current form
 | 1 | What is your name? | Short answer | Yes | Unchanged |
 | 2 | What is your email? | Short answer | Yes | Unchanged. Offers are shared to this address |
 | 3 | What is your phone #? | Short answer | Yes | Unchanged |
-| 4 | Weeks you selected | **Paragraph** | Yes | **The website prefills this.** Must be Paragraph, not Short answer — several weeks will not fit on one line |
+| 4 | Weeks you selected | ~~Paragraph~~ → **Checkboxes** | Yes | **The website prefills this.** Built as a Paragraph, changed to Checkboxes on 2026-08-14 so week data is structured rather than free text. See `SITE_CONTEXT.md` |
 | 5 | How firm is your interest? | Multiple choice | Yes | Options: `Ready to book now`, `Strong interest`, `Just exploring`. Replaces the per-week High/Medium/Low grid |
 | 6 | Anything else I should know (or, feel free to explain what exactly it is you're looking for)? | Paragraph | Yes | Unchanged |
 

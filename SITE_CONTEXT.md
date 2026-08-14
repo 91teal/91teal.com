@@ -48,9 +48,10 @@ The site should remain on GitHub Pages and retain its simple static architecture
 4. Amenities (`#amenities`)
 5. Gallery (`#gallery`)
 6. Tour (`#tour`)
-7. Availability (`#availability`)
-8. Booking/inquiry (`#book`)
-9. Footer
+7. Availability (`#availability`) — also the inquiry section since 2026-08-14
+8. Footer
+
+The separate booking section (`#book`) was removed on 2026-08-14 and merged into Availability. Its nav link went with it. `section[id]` carries a `scroll-margin-top` in `styles.css` so anchored sections stop clear of the fixed header; without it every nav target lands with its heading hidden.
 
 The page also includes a fixed header, share button, back-to-top button, expandable 22-photo gallery, and keyboard-navigable lightbox.
 
@@ -81,19 +82,23 @@ Created 2026-08-10 in Adam's **adam.m.tho@gmail.com** account, replacing `91 Tea
 | Title | `91 Teal Rental Interest` |
 | Public URL | `https://docs.google.com/forms/d/e/1FAIpQLSeyb3Sc93TWQ4cn5lgYTIGilZPN7VEvyOfsfQrzq6cTDguQiA/viewform` |
 | Edit URL | `https://docs.google.com/forms/d/1c0wL9FLM1mT4q30IENd5dg-a3CvmLz1Xdxjd-W-D8EM/edit` |
-| Weeks question entry id | `entry.586370353` |
-| Questions | Name, email, phone (short answer); Weeks you selected (paragraph); How firm is your interest? (multiple choice); free-text notes (paragraph). All required |
+| Weeks question entry id | `entry.1418677425` (checkboxes, since 2026-08-14) |
+| Questions | Name, email, phone (short answer); Weeks you selected (**checkboxes**, one option per bookable week); How firm is your interest? (multiple choice); free-text notes (paragraph). All required |
+
+The weeks question was a paragraph until 2026-08-14, on `entry.586370353`. That field is deleted; the id is dead and must not be reused.
 | Interest options | `Ready to book now`, `Strong interest`, `Just exploring` |
 
 Rules that must survive future edits:
 
 - Use the long `docs.google.com/forms/d/e/.../viewform` URL. A `forms.gle` short link can drop prefill parameters on redirect.
 - **Never hand-write or guess the entry id.** It must come from a real prefilled URL (form editor **⋮ → Get pre-filled link**, or `toPrefilledUrl()` in Apps Script).
-- The weeks question must stay a **Paragraph**. Several weeks do not fit on one line.
+- Checkbox prefill repeats the same parameter once per week: `entry.1418677425=<week>&entry.1418677425=<week>`.
+- **The site sends the date range only, never the holiday label.** Option text must match exactly, and holiday text comes from the feed's editable `event` column, so including it would break the match whenever that column is edited. `buildInquiryUrl()` in `index.html` enforces this.
+- The option labels use an **en dash** (U+2013), spaced when the week crosses a month (`Jul 28 – Aug 4, 2027`) and unspaced when it does not (`Jul 14–21, 2027`). Never hand-type one; see `docs/when-a-week-sells.md`.
 - Deleting and recreating the form changes both the URL and the entry id, so `index.html` must be updated in the same change.
 - Keep the form's responses away from the published availability sheet. The availability CSV is public; responses contain names, emails, and phone numbers. As of 2026-08-11 the form has no linked response spreadsheet — responses live in the form itself, which satisfies this.
 
-Adam's direction on 2026-08-11: **all three inquiry CTAs point at this one form**, so every inquiry lands in one place. The two generic "Request dates and rates" buttons open it with the weeks field empty and the visitor types their own weeks; only the availability section's "Request these weeks" prefills. Both paths are intended.
+Adam's direction on 2026-08-11 was that all three inquiry CTAs point at this one form. **Superseded on 2026-08-14:** the form is now reachable *only* from the availability section's "Request these weeks" button. The hero button scrolls to the week picker instead, and the bottom CTA was removed with the booking section. Every inquiry therefore arrives with weeks already ticked, which is what closed the "someone off the internet types anything" problem rather than merely mitigating it.
 
 ### Verified behaviour of Google Forms prefill (tested 2026-08-13 on a throwaway form)
 
@@ -116,7 +121,8 @@ These facts are observations from the current public source in `index.html`, not
 - The current site describes a 2023 renovation by BoND.
 - The current site describes four bedrooms sleeping eight guests, with three king beds and one queen bed.
 - The current site describes a heated saltwater pool, hot tub, outdoor shower, climate control, high-speed Wi-Fi, a new kitchen with two dishwashers, and pet-friendly stays.
-- The booking section says rentals run Wednesday to Wednesday, with 4:00 p.m. check-in and 10:00 a.m. check-out.
+- Rentals run Wednesday to Wednesday. **The 4:00 p.m. check-in and 10:00 a.m. check-out times are no longer stated anywhere on the site** — they lived only in the removed booking section, and Adam's replacement copy on 2026-08-14 dropped them. He was told; re-adding is a one-line change if he wants them back.
+- The availability section invites requests for `On Hold` weeks, explicitly not guaranteed. The renderer supports this (`status === 'available' || status === 'held'` is selectable), but a held week is only selectable when its sheet row also has `requestable` set to TRUE. The feed contained no held rows as of 2026-08-14, so this path is unexercised in production.
 - The current gallery contains 22 ordered photos. The first six render as the featured gallery; the remaining sixteen appear after expansion.
 
 Do not infer new rates, availability, policies, amenities, legal terms, or renovation claims from these observations.
@@ -275,3 +281,17 @@ These were observed from the cloned source and have not been fixed unless a late
 - Deleted the obsolete untracked `HANDOFF.md`. It described a branch-and-pull-request workflow Adam had already rejected and work that was already published, and its own header said it could be deleted.
 - Rewrote the stale "Workflow decisions" section above, which still instructed future agents to use `codex/<slug>` branches and pull requests. That contradicted `AGENTS.md` and would have led a fresh session to reintroduce exactly the friction Adam removed.
 - Open follow-ups for Adam: close the old 2026 form to responses, and decide whether to trash the throwaway `Untitled project` Apps Script project.
+
+### 2026-08-14 — PUBLISHED: weeks became checkboxes, and the site now funnels every inquiry through the picker
+
+- Adam's concern: a visitor arriving cold at the form could type anything into a free-text weeks box, giving him unusable data. He asked for checkboxes, or two forms, and wanted options.
+- **Verified how Google Forms prefill actually behaves** before recommending anything, using a throwaway form rather than his. Findings are recorded under "Week-interest form" above; the decisive one is that an unmatched value is **silently discarded**. Also learned not to trust `aria-checked` when inspecting a rendered form — it reads `false` even for a box just clicked; the hidden `input[name="entry.<id>"]` elements are the real state.
+- Adam rejected the sync-script option with sound reasoning: the site reads the CSV live and is always accurate, most visitors come through it, and a request for a sold week is still a lead. Alignment stays manual, procedure in `docs/when-a-week-sells.md`.
+- Two design decisions that make the manual approach safe: option labels carry the **date range only** (so the editable `event` column can never break the match), and the runbook's **sheet-before-form ordering** (so every intermediate state fails safe).
+- Switched the weeks question from Paragraph to Checkboxes with 21 options, in three stages so the form was valid at every moment: add the checkbox question and soften the old paragraph, then publish the site on the new entry id, then delete the paragraph. The script aborted if any response existed; there were none.
+- Verified end to end **on the live domain**, not just locally: clicked weeks on `www.91teal.com`, followed the button, and confirmed exactly the selected boxes were ticked on the real form. Repeated after the paragraph was deleted.
+- **Adam then restructured the funnel:** the hero button scrolls to the availability section instead of opening the form, and the booking section was deleted and merged into Availability with new copy he supplied. The form is now reachable only after weeks are chosen.
+- Found and fixed a pre-existing defect while adding his deep link: no `scroll-margin-top` existed anywhere, so every nav anchor landed with its section heading behind the fixed header. Sections now stop ~27px clear, with a larger offset below 800px where the header grows.
+- `behavior: 'smooth'` could not be verified in a real browser — `localhost` and `docs.google.com` are both blocked for the Chrome extension, and the in-app preview pane has no compositor so smooth scrolling is inert there. A fallback jump was added and *that* path was verified.
+- Corrected an apparent typo in Adam's supplied copy, `Oh Hold` to `On Hold`, matching the legend; he was told.
+- Published `c85e45f` and `87b0a85`, each confirmed live by fetching the real domain.
