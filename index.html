@@ -129,7 +129,6 @@
           <a href="#gallery">Gallery</a>
           <a href="#tour">Tour</a>
           <a href="#availability">Availability</a>
-          <a href="#book">Book</a>
         </nav>
       </header>
 
@@ -279,6 +278,8 @@
           <p class="section-body">
             Pick the Wednesday-to-Wednesday weeks you are interested in. Select as many as you like, then send them over together. Final confirmations are shared directly with the host.
           </p>
+          <p class="section-body">Pricing varies by week throughout the season, with the highest demand between July 4 and Labor Day. Discounts may be considered for "share"-like bookings.</p>
+          <p class="section-body"><strong>Feel free to submit a request for an "On Hold" week; it is in no way guaranteed.</strong></p>
           <div class="availability-module">
             <div id="availability-loading" class="availability-message" role="status" aria-live="polite">Loading availability…</div>
             <h3 id="availability-season" class="availability-season" hidden></h3>
@@ -301,17 +302,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- BOOK -->
-      <section id="book">
-        <div class="section-label">Book</div>
-        <div class="section-card">
-          <h2 class="section-title">Request dates and rates</h2>
-          <p class="section-body">Rentals at 91 Teal run Wednesday to Wednesday. Check in is at 4:00 p.m., and check out is at 10:00 a.m. Pricing varies by week throughout the season, with the highest demand between July 4 and Labor Day. Discounts may be considered for multi week bookings.</p>
-
-          <button id="cta-inquiry-bottom" class="btn-primary" style="margin-top: 18px;">Open inquiry form</button>
         </div>
       </section>
 
@@ -442,14 +432,30 @@
     '2027-W1020,"Oct 20, 2027","Oct 27, 2027",Oct 20–Oct 27,,AVAILABLE,TRUE,"Aug 6, 2026"'
   ].join('\n');
 
+  // The hero button sends visitors down to the week picker rather than straight
+  // to the form, so an inquiry arrives with the weeks already selected instead
+  // of an empty weeks question. The form is reached only from that section.
   document.getElementById('cta-inquiry').addEventListener('click', function () {
-    trackClick('inquiry_top', 'google_form');
-    window.open(googleFormUrl, '_blank');
-  });
+    trackClick('inquiry_top', 'availability_section');
 
-  document.getElementById('cta-inquiry-bottom').addEventListener('click', function () {
-    trackClick('inquiry_bottom', 'google_form');
-    window.open(googleFormUrl, '_blank');
+    var target = document.getElementById('availability');
+    if (!target) return;
+
+    var before = window.pageYOffset;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // If smooth scrolling is ignored, the button would look dead. Fall back to
+    // an ordinary jump so the visitor always lands on the picker.
+    window.setTimeout(function () {
+      if (Math.abs(window.pageYOffset - before) < 2) {
+        target.scrollIntoView({ block: 'start' });
+      }
+    }, 400);
+
+    // Leave a shareable URL behind without adding a history entry.
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', '#availability');
+    }
   });
 
   document.getElementById('cta-instagram').addEventListener('click', function () {

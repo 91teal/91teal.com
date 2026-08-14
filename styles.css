@@ -225,6 +225,19 @@ section {
   margin-bottom: var(--spacing-section);
 }
 
+/* The header is fixed, so anchor targets must stop clear of it. Without this
+   a jump to #availability hides the section heading behind the header. The
+   header is taller below 800px, where the nav wraps, so the offset grows too. */
+section[id] {
+  scroll-margin-top: 88px;
+}
+
+@media (max-width: 799px) {
+  section[id] {
+    scroll-margin-top: 104px;
+  }
+}
+
 .section-label {
   font-size: 0.8rem;
   letter-spacing: 0.14em;
